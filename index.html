@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Easy IT Academy - Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS: native Excel .xlsx export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- ExcelJS: formatted full-workbook backup (bold headers, frozen rows, date/currency formats) -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            darkBg: '#0a0718',
+                            glassBg: 'rgba(28, 22, 56, 0.65)',
+                            glassHover: 'rgba(40, 32, 78, 0.75)',
+                            glassBorder: 'rgba(255, 255, 255, 0.12)',
+                            purpleAccent: '#7c4dff',
+                            purpleGlow: '#651fff',
+                            cyanAccent: '#00e5ff',
+                            blueAccent: '#2979ff',
+                            darkCard: 'rgba(18, 14, 38, 0.85)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Glassmorphism Styling matching reference design */
+        body {
+            background: linear-gradient(135deg, #070412 0%, #0d0826 40%, #150d3d 100%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(26, 20, 52, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(33, 26, 66, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: all 0.25s ease-in-out;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 6px 24px rgba(101, 31, 255, 0.25);
+        }
+
+        .glass-input {
+            background: rgba(15, 11, 33, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: #00e5ff;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(124, 77, 255, 0.35);
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 7, 24, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(124, 77, 255, 0.4);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 229, 255, 0.6);
+        }
+
+        /* Active Navigation Link Indicator */
+        .nav-active {
+            background: linear-gradient(90deg, rgba(124, 77, 255, 0.3) 0%, rgba(0, 229, 255, 0.1) 100%);
+            border-left: 4px solid #00e5ff;
+            color: #ffffff !important;
+        }
+
+        /* Print Specific CSS Styles for PDF documents */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .print-container {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 20px !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+        
+        .print-only {
+            display: none;
+        }
+
+        /* Refined academy login branding + responsive polish */
+        .login-brand-wrap{display:flex;align-items:center;justify-content:center;gap:14px;margin:2px auto 26px;}
+        .login-brand-mark{width:76px;height:76px;padding:5px;border-radius:22px;background:linear-gradient(145deg,#fff,#dbeafe);box-shadow:0 12px 35px rgba(37,99,235,.28),inset 0 1px 0 #fff;flex:none}
+        .login-brand-mark svg{width:100%;height:100%;display:block}
+        .login-brand-copy{text-align:left;line-height:1.05}
+        .login-brand-copy div{font-size:30px;font-weight:900;letter-spacing:-1.4px;color:#fff}
+        .login-brand-copy b{color:#38bdf8;margin-left:7px;font-weight:900}
+        .login-brand-copy small{display:block;margin-top:8px;font-size:9px;font-weight:800;letter-spacing:2.4px;color:#a5b4fc}
+        @media(max-width:420px){#loginSection{padding:14px!important}#loginSection .glass-panel{padding:24px 19px!important;border-radius:24px!important}.login-brand-mark{width:62px;height:62px;border-radius:18px}.login-brand-copy div{font-size:25px}.login-brand-copy small{font-size:8px;letter-spacing:1.7px}.login-brand-wrap{gap:10px;margin-bottom:22px}}
+        /* Reliable clean A4 print / Save as PDF */
+        @page{size:A4 portrait;margin:0}
+        @media print{
+          html,body{width:210mm!important;min-height:0!important;background:#fff!important;color:#111!important;margin:0!important;padding:0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+          body *{visibility:hidden!important}
+          .print-only,.print-only *{visibility:visible!important}
+          .print-only{display:block!important;position:absolute!important;left:0!important;top:0!important;width:186mm!important;margin:0!important;padding:0!important;background:#fff!important;color:#111!important}
+          .print-container{width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#111!important;box-shadow:none!important;border:0!important;font-family:Arial,'Noto Sans Bengali',sans-serif!important}
+          .print-container>div{border:1.5px solid #1e3a8a!important;padding:9mm!important;min-height:250mm!important;box-sizing:border-box!important}
+          .print-container table{width:100%!important;border-collapse:collapse!important}
+          .print-container th,.print-container td{border:1px solid #cbd5e1!important;padding:8px!important}
+          .print-container .print-brand{display:flex!important;align-items:center!important;gap:12px!important}
+          .print-container .print-logo{width:48px!important;height:48px!important;flex:none!important}
+          .print-container .print-logo svg{width:100%!important;height:100%!important}
+          .print-container h1{color:#123c91!important}
+          .print-container .signature-row{margin-top:45mm!important}
+          .no-print{display:none!important}
+        }
+
+        /* ===== FINAL UPDATE: toast, print area, A4 receipt, mobile polish ===== */
+        #toastBox{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));max-width:420px;margin-left:auto;z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+        .toast-item{color:#fff;padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:opacity .4s;word-break:break-word}
+        #printArea{display:none}
+        .slip{width:210mm;height:296mm;box-sizing:border-box;padding:10mm;background:#fff;color:#0f172a;font-family:Arial,'Noto Sans Bengali','Nirmala UI',sans-serif;font-size:13px;line-height:1.45;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+        .slip-frame{height:100%;box-sizing:border-box;border:2px solid #1e3a8a;border-radius:6px;padding:9mm 10mm 7mm;display:flex;flex-direction:column}
+        .slip-head{display:flex;align-items:center;gap:16px;padding-bottom:12px;border-bottom:3px solid #1d4ed8}
+        .slip-logo{width:64px;height:64px;flex:none}
+        .slip-logo svg{width:100%;height:100%;display:block}
+        .slip-org h1{margin:0;font-size:30px;line-height:1.1;color:#123c91;font-weight:800;letter-spacing:-.5px}
+        .slip-org p{margin:5px 0 0;font-size:13px;color:#334155}
+        .slip-title{margin:14px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:9px 12px}
+        .slip-title b{font-size:18px;letter-spacing:2.5px;color:#1e3a8a}
+        .slip-title span{font-size:12px;color:#334155;text-align:right}
+        .slip-sec{margin-top:13px}
+        .slip-sec h3{margin:0 0 7px;font-size:11.5px;letter-spacing:1.3px;text-transform:uppercase;color:#1e3a8a;border-bottom:1px solid #cbd5e1;padding-bottom:4px}
+        .slip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px}
+        .slip-field span{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.6px}
+        .slip-field b{display:block;font-size:13.5px;color:#0f172a;word-break:break-word}
+        .slip-table{width:100%;border-collapse:collapse}
+        .slip-table td{border:1px solid #cbd5e1;padding:8px 11px;font-size:13px}
+        .slip-table td:last-child{text-align:right;font-weight:700;width:38%}
+        .slip-table tr.hl td{background:#ecfdf5;color:#065f46;font-size:15px}
+        .slip-table tr.due td{background:#fef2f2;color:#b91c1c;font-size:15px}
+        .slip-next{position:relative;margin-top:14px;border:1.5px dashed #1d4ed8;border-radius:6px;padding:11px 13px;display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8fafc}
+        .slip-next .slip-field b{font-size:17px}
+        .slip-paidfull{grid-column:1 / -1;text-align:center;font-weight:800;letter-spacing:3px;color:#047857;border:2px solid #047857;border-radius:6px;padding:4px}
+        .slip-sign{margin-top:auto;display:flex;justify-content:space-between;gap:20px;padding-top:26px}
+        .slip-sign span{width:44%;border-top:1px solid #334155;text-align:center;padding-top:5px;font-size:12px}
+        .slip-foot{margin-top:12px;text-align:center;font-size:10.5px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:6px}
+        .doc{width:210mm;box-sizing:border-box;padding:14mm;background:#fff;color:#111;font-family:Arial,'Noto Sans Bengali','Nirmala UI',sans-serif;font-size:13px}
+        .doc header{display:flex;align-items:center;gap:15px;border-bottom:3px solid #1d4ed8;padding-bottom:12px;margin-bottom:16px}
+        .doc .logo{width:56px;height:56px;flex:none}.doc .logo svg{width:100%;height:100%}
+        .doc h1{font-size:24px;margin:0;color:#123c91}.doc small{color:#475569;line-height:1.5}
+        .doc .box{border:1px solid #cbd5e1;padding:16px;border-radius:8px}
+        .doc table{width:100%;border-collapse:collapse;margin-top:12px}
+        .doc th,.doc td{border:1px solid #cbd5e1;padding:7px 9px;text-align:left;font-size:12px;vertical-align:top}
+        .doc th{background:#eff6ff}.doc tr{break-inside:avoid}.doc thead{display:table-header-group}
+        .doc .sign{display:flex;justify-content:space-between;margin-top:60px}
+        .doc .sign span{border-top:1px solid #333;padding-top:6px;width:190px;text-align:center}
+        .doc .sum{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+        .doc .sum div{flex:1;min-width:110px;border:1px solid #cbd5e1;border-radius:6px;padding:8px;background:#f8fafc}
+        @media print{
+          html,body{width:210mm!important;height:auto!important;margin:0!important;padding:0!important;background:#fff!important;overflow:visible!important}
+          *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+          body.printing-doc > *:not(#printArea){display:none!important}
+          body:not(.printing-doc) .print-only{display:none!important}
+          body.printing-doc #printArea{display:block!important;visibility:visible!important;position:static!important;width:210mm!important;margin:0!important;padding:0!important;background:#fff!important}
+          body.printing-doc #printArea, body.printing-doc #printArea *{visibility:visible!important}
+        }
+        /* ---- Mobile / tablet ---- */
+        html{overflow-x:hidden;-webkit-text-size-adjust:100%}
+        main{overflow-x:hidden}
+        input[type=date]{color-scheme:dark;min-height:42px;min-width:0}
+        input,select,textarea{max-width:100%}
+        .overflow-x-auto{-webkit-overflow-scrolling:touch}
+        #sidebarBackdrop{display:none}
+        #paymentHistoryPreview:empty{display:none}
+        @media(max-width:767px){
+          #sidebar:not(.-translate-x-full)+#sidebarBackdrop{display:block}
+          .overflow-x-auto table{min-width:640px}
+          .glass-card .overflow-x-auto td button,.glass-card .overflow-x-auto td a{padding:4px 2px}
+        }
+        @media(max-width:640px){
+          input,select,textarea{font-size:16px!important}
+          .fixed.inset-0 > .glass-panel{max-height:92vh!important;max-height:calc(100dvh - 24px)!important;padding:18px!important;border-radius:22px!important}
+          #tab-dashboard .grid-cols-2 h3{font-size:1.1rem;word-break:break-word}
+          #tab-attendance table{min-width:560px}
+        }
+        @media(max-width:480px){
+          #paymentModal .grid-cols-2,#courseModal .grid-cols-2,#examModal .grid-cols-2,#expenseModal .grid-cols-2,#batchModal .grid-cols-2{grid-template-columns:1fr!important}
+        }
+        .slip-addr{margin-top:5px;font-size:13px;line-height:1.5;color:#334155}
+        .slip-phone{margin-top:4px;font-size:13px;font-weight:700;color:#123c91;letter-spacing:.3px}
+        /* Student Bio Data template */
+        .bio{width:210mm;height:296mm;box-sizing:border-box;padding:10mm;background:#fff;color:#0f172a;font-family:Arial,'Noto Sans Bengali','Nirmala UI',sans-serif;font-size:13px;line-height:1.45;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+        .bio-frame{height:100%;box-sizing:border-box;border:2px solid #1e3a8a;border-radius:6px;padding:0 0 7mm;display:flex;flex-direction:column;overflow:hidden}
+        .bio-head{display:flex;align-items:center;gap:16px;padding:9mm 10mm 7mm;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-bottom:4px solid #1d4ed8}
+        .bio-logo{width:66px;height:66px;flex:none}.bio-logo svg{width:100%;height:100%;display:block}
+        .bio-org h1{margin:0;font-size:30px;line-height:1.1;color:#123c91;font-weight:800;letter-spacing:-.5px}
+        .bio-org .bio-addr{margin-top:5px;font-size:13px;line-height:1.5;color:#334155}
+        .bio-org .bio-phone{margin-top:4px;font-size:13px;font-weight:700;color:#123c91}
+        .bio-title{margin:12px 10mm 0;text-align:center;font-size:17px;font-weight:800;letter-spacing:3px;color:#1e3a8a;text-transform:uppercase;border-bottom:1px solid #cbd5e1;padding-bottom:8px}
+        .bio-body{padding:0 10mm;margin-top:12px}
+        .bio-id{display:flex;gap:18px;align-items:stretch;border:1px solid #bfdbfe;border-radius:8px;background:#f8fafc;padding:12px}
+        .bio-photo{width:34mm;height:42mm;flex:none;border:1px solid #94a3b8;border-radius:6px;background:#f1f5f9;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:10px;font-weight:700;text-align:center}
+        .bio-photo img{width:100%;height:100%;object-fit:cover;display:block}
+        .bio-idinfo{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+        .bio-name{font-size:22px;font-weight:800;color:#0f172a;word-break:break-word}
+        .bio-chip{display:inline-block;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;background:#dbeafe;color:#1e3a8a;margin-right:6px}
+        .bio-idrow{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}
+        .bio-idbox{border:1px solid #bfdbfe;border-radius:6px;background:#fff;padding:6px 9px;min-width:0}
+        .bio-idbox span{display:block;font-size:9.5px;color:#64748b;text-transform:uppercase;letter-spacing:.6px}
+        .bio-idbox b{display:block;font-size:14px;color:#1e3a8a;font-weight:800;word-break:break-word}
+        .bio-course{font-size:13px;color:#334155}
+        .bio-grid .bio-cell:last-child{border-bottom:0}
+        .bio-sec{margin-top:14px}
+        .bio-sec h3{margin:0 0 7px;font-size:11.5px;letter-spacing:1.3px;text-transform:uppercase;color:#fff;background:#1e3a8a;border-radius:4px;padding:5px 10px}
+        .bio-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #cbd5e1;border-radius:6px;overflow:hidden}
+        .bio-cell{padding:8px 11px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;min-width:0}
+        .bio-cell:nth-child(2n){border-right:0}
+        .bio-cell.full{grid-column:1 / -1;border-right:0}
+        .bio-cell span{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.6px}
+        .bio-cell b{display:block;font-size:13.5px;color:#0f172a;word-break:break-word;font-weight:600}
+        .bio-sign{margin-top:auto;display:flex;justify-content:space-between;gap:20px;padding:26px 10mm 0}
+        .bio-sign span{width:44%;border-top:1px solid #334155;text-align:center;padding-top:5px;font-size:12px}
+        .bio-foot{margin:10px 10mm 0;text-align:center;font-size:10.5px;color:#64748b;border-top:1px solid #e2e8f0;padding-top:6px}
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-cyanAccent selection:text-black">
+
+    <!-- LOGIN SCREEN WRAPPER -->
+    <div id="loginSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gradient-to-br from-[#060312] via-[#0d0726] to-[#160b3c]">
+        <div class="glass-panel w-full max-w-md p-8 rounded-3xl relative overflow-hidden shadow-2xl border border-white/10">
+            <!-- Background Glow Orbs -->
+            <div class="absolute -top-12 -right-12 w-40 h-40 bg-brand-purpleAccent/30 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-brand-cyanAccent/20 rounded-full blur-3xl"></div>
+
+            <div class="relative z-10 text-center">
+                <!-- Refined Easy IT Academy brand mark -->
+                <div class="login-brand-wrap">
+                    <div class="login-brand-mark" aria-label="Easy IT Academy logo">
+                        <svg viewBox="0 0 64 64" role="img" aria-hidden="true">
+                            <rect x="5" y="5" width="54" height="54" rx="16" fill="#eff6ff"/>
+                            <path d="M18 20h28v7H25v5h17v7H25v5h21v7H18z" fill="#1769e8"/>
+                            <rect x="39" y="12" width="6" height="6" rx="1.5" fill="#06b6d4"/><rect x="47" y="12" width="6" height="6" rx="1.5" fill="#60a5fa"/><rect x="47" y="20" width="6" height="6" rx="1.5" fill="#06b6d4"/>
+                        </svg>
+                    </div>
+                    <div class="login-brand-copy"><div><span>EASY</span><b>IT</b></div><small>ACADEMY · LEARN & GROW</small></div>
+                </div>
+
+                <h2 class="text-2xl font-bold text-white mb-1">Welcome Back</h2>
+                <p class="text-xs text-slate-400 mb-6">Enter system access credentials</p>
+
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Username</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fas fa-user"></i></span>
+                            <input type="text" id="loginUsername" required class="glass-input w-full pl-10 pr-4 py-3 rounded-xl text-sm" placeholder="easyit">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fas fa-lock"></i></span>
+                            <input type="password" id="loginPassword" required class="glass-input w-full pl-10 pr-4 py-3 rounded-xl text-sm" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div id="loginError" class="hidden text-red-400 text-xs bg-red-500/10 border border-red-500/30 p-2.5 rounded-lg">
+                        <i class="fas fa-exclamation-circle mr-1"></i> Invalid username or password.
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-brand-purpleGlow via-brand-purpleAccent to-brand-cyanAccent text-white font-bold rounded-xl shadow-lg hover:opacity-95 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                        <span>Login to System</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+
+                <!-- Architectural Disclaimer Note -->
+                <div class="mt-6 pt-4 border-t border-white/10 text-left">
+                    <div class="p-3 bg-indigo-950/40 rounded-xl border border-indigo-500/20 text-[11px] text-slate-400 leading-relaxed">
+                        <span class="text-brand-cyanAccent font-semibold"><i class="fas fa-shield-alt mr-1"></i> Security Note:</span> 
+                        Frontend authentication on GitHub Pages operates as local browser convenience security. Real-time data is saved safely in your client browser IndexedDB.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP INTERFACE -->
+    <div id="appContainer" class="hidden min-h-screen flex flex-col md:flex-row">
+
+        <!-- MOBILE NAVBAR TOPBAR -->
+        <div class="md:hidden glass-panel border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+            <div class="flex items-center gap-2">
+                <div class="bg-white px-2 py-1 rounded-md">
+                    <span class="font-black text-brand-blueAccent text-base tracking-tight">Easy<span class="text-cyan-500">IT</span></span>
+                </div>
+                <span class="text-xs font-semibold text-slate-300">Academy System</span>
+            </div>
+            <button onclick="toggleSidebar()" class="p-2 text-slate-300 hover:text-white glass-card rounded-lg">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
+        </div>
+
+        <!-- SIDEBAR NAVIGATION DRAWER -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-40 w-64 glass-panel transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between border-r border-white/10">
+            <div>
+                <!-- Brand Sidebar Header -->
+                <div class="p-5 border-b border-white/10 flex items-center justify-between">
+                    <div class="bg-white/95 p-2.5 rounded-xl shadow-md w-full flex items-center justify-center">
+                        <svg width="150" height="40" viewBox="0 0 320 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <text x="10" y="55" font-family="'Inter', sans-serif" font-weight="800" font-size="58" fill="#0066FF">Eas</text>
+                            <text x="125" y="55" font-family="'Inter', sans-serif" font-weight="800" font-size="58" fill="#0055DD">y</text>
+                            <rect x="185" y="10" width="12" height="12" rx="2" fill="#00E5FF"/>
+                            <rect x="170" y="22" width="12" height="12" rx="2" fill="#0099FF"/>
+                            <rect x="185" y="24" width="12" height="12" rx="2" fill="#0066FF"/>
+                            <rect x="199" y="24" width="10" height="10" rx="2" fill="#00E5FF"/>
+                            <text x="12" y="80" font-family="'Inter', sans-serif" font-weight="700" font-size="18" fill="#1E293B" letter-spacing="4">IT ACADEMY</text>
+                        </svg>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white ml-2">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-180px)]">
+                    <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-chart-pie w-5 text-center text-brand-cyanAccent"></i> Dashboard
+                    </a>
+                    <a href="#" onclick="switchTab('students')" id="nav-students" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-user-graduate w-5 text-center text-purple-400"></i> Students
+                    </a>
+                    <a href="#" onclick="switchTab('courses')" id="nav-courses" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-book-open w-5 text-center text-blue-400"></i> Courses & Batches
+                    </a>
+                    <a href="#" onclick="switchTab('payments')" id="nav-payments" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-file-invoice-dollar w-5 text-center text-emerald-400"></i> Payments & Dues
+                    </a>
+                    <a href="#" onclick="switchTab('attendance')" id="nav-attendance" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-calendar-check w-5 text-center text-amber-400"></i> Attendance
+                    </a>
+                    <a href="#" onclick="switchTab('teachers')" id="nav-teachers" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-chalkboard-teacher w-5 text-center text-pink-400"></i> Teachers & Staff
+                    </a>
+                    <a href="#" onclick="switchTab('exams')" id="nav-exams" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-poll-h w-5 text-center text-indigo-400"></i> Exams & Results
+                    </a>
+                    <a href="#" onclick="switchTab('financials')" id="nav-financials" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-wallet w-5 text-center text-teal-400"></i> Income & Expense
+                    </a>
+                    <a href="#" onclick="switchTab('reports')" id="nav-reports" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-file-alt w-5 text-center text-cyan-400"></i> Data & Exports
+                    </a>
+                    <a href="#" onclick="switchTab('activity')" id="nav-activity" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition">
+                        <i class="fas fa-history w-5 text-center text-slate-400"></i> Activity Logs
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Sidebar User Profile Footer -->
+            <div class="p-4 border-t border-white/10 bg-black/20 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-brand-purpleGlow to-brand-cyanAccent flex items-center justify-center text-white font-bold text-sm shadow">
+                        <span id="userRoleBadge">A</span>
+                    </div>
+                    <div>
+                        <p id="currentUserName" class="text-xs font-bold text-white capitalize">easyit</p>
+                        <p id="currentUserRole" class="text-[10px] text-slate-400 uppercase tracking-wider">Administrator</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-red-400 transition" title="Logout">
+                    <i class="fas fa-sign-out-alt text-base"></i>
+                </button>
+            </div>
+        </aside>
+        <div id="sidebarBackdrop" onclick="toggleSidebar()" style="position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.6)"></div>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+
+            <!-- TOPBAR HEADER -->
+            <header class="glass-panel sticky top-0 z-20 px-6 py-4 border-b border-white/10 hidden md:flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <h1 id="pageTitle" class="text-xl font-bold text-white tracking-tight">Overview Dashboard</h1>
+                    <span id="currentDateDisplay" class="text-xs text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10"></span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="switchTab('payments')" class="px-3.5 py-2 glass-card hover:bg-brand-purpleAccent/20 text-brand-cyanAccent rounded-xl text-xs font-semibold flex items-center gap-2 border border-brand-cyanAccent/30 transition">
+                        <i class="fas fa-plus-circle"></i> Quick Payment
+                    </button>
+                    <button onclick="switchTab('students')" class="px-3.5 py-2 bg-gradient-to-r from-brand-purpleGlow to-brand-purpleAccent text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow hover:opacity-95 transition">
+                        <i class="fas fa-user-plus"></i> New Student
+                    </button>
+                </div>
+            </header>
+
+            <!-- DYNAMIC VIEW PAGES CONTENT -->
+            <div class="p-4 md:p-6 space-y-6 flex-1">
+
+                <!-- 1. DASHBOARD TAB PAGE -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    <!-- Analytics Stat Cards Grid (7 Key Metrics) -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="glass-card p-4 rounded-2xl relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-400">Total Students</p>
+                                    <h3 id="statTotalStudents" class="text-2xl font-black text-white mt-1">0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                                    <i class="fas fa-users text-lg"></i>
+                                </div>
+                            </div>
+                            <p id="statActiveStudents" class="text-[11px] text-emerald-400 mt-2 font-medium">0 Active Enrolled</p>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-2xl relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-400">Total Courses</p>
+                                    <h3 id="statTotalCourses" class="text-2xl font-black text-white mt-1">0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                                    <i class="fas fa-book text-lg"></i>
+                                </div>
+                            </div>
+                            <p id="statTotalBatches" class="text-[11px] text-slate-400 mt-2">0 Active Batches</p>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-2xl relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-400">Total Collection</p>
+                                    <h3 id="statTotalCollection" class="text-2xl font-black text-emerald-400 mt-1">৳ 0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                                    <i class="fas fa-money-bill-wave text-lg"></i>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-2">All Real Collections</p>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-2xl relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-400">Total Due Balance</p>
+                                    <h3 id="statTotalDue" class="text-2xl font-black text-rose-400 mt-1">৳ 0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center">
+                                    <i class="fas fa-hand-holding-usd text-lg"></i>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-2">Pending Installments</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts & Recent Activity Visual Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Canvas Revenue Visualizer -->
+                        <div class="glass-card p-5 rounded-2xl lg:col-span-2">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                    <i class="fas fa-chart-bar text-brand-cyanAccent"></i> Financial Breakdown Overview
+                                </h4>
+                                <span class="text-[11px] text-slate-400 bg-white/5 px-2.5 py-1 rounded-md">Real Data</span>
+                            </div>
+                            <div class="h-56 relative flex items-center justify-center">
+                                <canvas id="financialChartCanvas" class="w-full h-full"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Quick Summary & System Status -->
+                        <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                                    <i class="fas fa-info-circle text-brand-purpleAccent"></i> Academy Summary
+                                </h4>
+                                <div class="space-y-3 text-xs">
+                                    <div class="flex justify-between py-2 border-b border-white/5">
+                                        <span class="text-slate-400">Teachers & Instructors</span>
+                                        <span id="statTeachersCount" class="font-bold text-white">0</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-white/5">
+                                        <span class="text-slate-400">Total Recorded Expenses</span>
+                                        <span id="statTotalExpenses" class="font-bold text-rose-400">৳ 0</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-white/5">
+                                        <span class="text-slate-400">Net Balance</span>
+                                        <span id="statNetBalance" class="font-bold text-brand-cyanAccent">৳ 0</span>
+                                    </div>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-slate-400">Local Database Version</span>
+                                        <span class="font-semibold text-slate-300">IndexedDB 1.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-400">
+                                <i class="fas fa-shield-alt text-brand-cyanAccent mr-1"></i> Data operates strictly local-first. Use Backup feature to export JSON files safely.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Payments Table Section -->
+                    <div class="glass-card p-5 rounded-2xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fas fa-history text-emerald-400"></i> Recent Payment Transactions
+                            </h4>
+                            <button onclick="switchTab('payments')" class="text-xs text-brand-cyanAccent hover:underline">View All</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-white/5 text-slate-400 uppercase text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-3">Receipt No</th>
+                                        <th class="p-3">Student Name</th>
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Method</th>
+                                        <th class="p-3">Amount</th>
+                                        <th class="p-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentPaymentsTable" class="divide-y divide-white/5">
+                                    <!-- Rendered dynamically or empty state -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. STUDENT MANAGEMENT TAB PAGE -->
+                <div id="tab-students" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <div class="relative w-full sm:w-72">
+                                <input type="text" id="studentSearchInput" oninput="renderStudentsTable()" placeholder="Search by name, ID or phone..." class="glass-input w-full pl-9 pr-4 py-2 rounded-xl text-xs">
+                                <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+                            </div>
+                            <select id="studentCourseFilter" onchange="renderStudentsTable()" class="glass-input px-3 py-2 rounded-xl text-xs bg-slate-900">
+                                <option value="">All Courses</option>
+                            </select>
+                        </div>
+                        <button onclick="openStudentModal()" class="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-brand-purpleGlow to-brand-purpleAccent text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow">
+                            <i class="fas fa-plus"></i> Add New Student
+                        </button>
+                    </div>
+
+                    <!-- Students Data Table -->
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-white/5 text-slate-400 uppercase text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-3.5">Student ID</th>
+                                        <th class="p-3.5">Student Details</th>
+                                        <th class="p-3.5">Course / Batch</th>
+                                        <th class="p-3.5">Admission Date</th>
+                                        <th class="p-3.5">Status</th>
+                                        <th class="p-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody" class="divide-y divide-white/5">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. COURSE AND BATCH MANAGEMENT TAB -->
+                <div id="tab-courses" class="tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Course Column -->
+                        <div class="glass-card p-5 rounded-2xl space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fas fa-graduation-cap text-purple-400"></i> Course Registry
+                                </h3>
+                                <button onclick="openCourseModal()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg text-xs">
+                                    + Add Course
+                                </button>
+                            </div>
+                            <div id="coursesListContainer" class="space-y-3">
+                                <!-- Dynamic Courses Render -->
+                            </div>
+                        </div>
+
+                        <!-- Batch Column -->
+                        <div class="glass-card p-5 rounded-2xl space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fas fa-users-class text-cyan-400"></i> Batch Management
+                                </h3>
+                                <button onclick="openBatchModal()" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg text-xs">
+                                    + Add Batch
+                                </button>
+                            </div>
+                            <div id="batchesListContainer" class="space-y-3">
+                                <!-- Dynamic Batches Render -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. INSTALLMENT PAYMENT MANAGEMENT TAB -->
+                <div id="tab-payments" class="tab-content hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h3 class="text-lg font-bold text-white">Payment & Installment Ledger</h3>
+                        <button onclick="openPaymentModal()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow">
+                            <i class="fas fa-hand-holding-usd"></i> Record New Payment
+                        </button>
+                    </div>
+
+                    <!-- Payment History Table -->
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-white/5 text-slate-400 uppercase text-[10px] tracking-wider">
+                                    <tr>
+                                        <th class="p-3.5">Receipt ID</th>
+                                        <th class="p-3.5">Student Info</th>
+                                        <th class="p-3.5">Payment Date</th>
+                                        <th class="p-3.5">Method</th>
+                                        <th class="p-3.5">Paid Amount</th>
+                                        <th class="p-3.5">Transaction / Ref ID</th>
+                                        <th class="p-3.5">Next Payment</th>
+                                        <th class="p-3.5 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentsTableBody" class="divide-y divide-white/5">
+                                    <!-- Dynamic Payment Records -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. ATTENDANCE MANAGEMENT TAB -->
+                <div id="tab-attendance" class="tab-content hidden space-y-6">
+                    <div class="glass-card p-5 rounded-2xl space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Select Batch</label>
+                                <select id="attendanceBatchSelect" onchange="renderAttendanceSheet()" class="glass-input w-full px-3 py-2 rounded-xl text-xs bg-slate-900">
+                                    <option value="">Choose Batch</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1">Attendance Date</label>
+                                <input type="date" id="attendanceDate" onchange="renderAttendanceSheet()" class="glass-input w-full px-3 py-2 rounded-xl text-xs">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="saveBatchAttendance()" class="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2">
+                                    <i class="fas fa-save"></i> Save Attendance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-white/5 text-slate-400 uppercase text-[10px]">
+                                    <tr>
+                                        <th class="p-3.5">Student ID</th>
+                                        <th class="p-3.5">Student Name</th>
+                                        <th class="p-3.5">Status</th>
+                                        <th class="p-3.5">Remarks / Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceSheetBody" class="divide-y divide-white/5">
+                                    <!-- Attendance Student Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. TEACHER AND STAFF MANAGEMENT TAB -->
+                <div id="tab-teachers" class="tab-content hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white">Faculty & Staff Accounts</h3>
+                        <button onclick="openTeacherModal()" class="px-4 py-2.5 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl text-xs flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i> Add Staff / Teacher
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="teachersGrid">
+                        <!-- Dynamic Teacher Cards -->
+                    </div>
+                </div>
+
+                <!-- 7. EXAM AND RESULT MANAGEMENT TAB -->
+                <div id="tab-exams" class="tab-content hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white">Exams & Student Evaluations</h3>
+                        <button onclick="openExamModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Create Exam Record
+                        </button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-white/5 text-slate-400 uppercase text-[10px]">
+                                    <tr>
+                                        <th class="p-3.5">Exam Title</th>
+                                        <th class="p-3.5">Student Name</th>
+                                        <th class="p-3.5">Batch</th>
+                                        <th class="p-3.5">Marks Secured</th>
+                                        <th class="p-3.5">Grade</th>
+                                        <th class="p-3.5">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="examsTableBody" class="divide-y divide-white/5">
+                                    <!-- Dynamic Exam Records -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. INCOME AND EXPENSE TAB -->
+                <div id="tab-financials" class="tab-content hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white">Expense Tracker & Financial Records</h3>
+                        <button onclick="openExpenseModal()" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs flex items-center gap-2">
+                            <i class="fas fa-minus-circle"></i> Log New Expense
+                        </button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-white/5 text-slate-400 uppercase text-[10px]">
+                                    <tr>
+                                        <th class="p-3.5">Expense Item</th>
+                                        <th class="p-3.5">Category</th>
+                                        <th class="p-3.5">Date</th>
+                                        <th class="p-3.5">Amount</th>
+                                        <th class="p-3.5">Payment Method</th>
+                                        <th class="p-3.5">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expensesTableBody" class="divide-y divide-white/5">
+                                    <!-- Dynamic Expense Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. REPORTS, EXPORTS & BACKUP TAB -->
+                <div id="tab-reports" class="tab-content hidden space-y-6">
+                    <div class="glass-card p-6 rounded-2xl space-y-3 border border-emerald-500/30">
+                        <h4 class="text-base font-bold text-white flex items-center gap-2"><i class="fas fa-file-excel text-emerald-400"></i> Complete Excel Backup (All Data)</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">One click downloads a single .xlsx workbook with separate sheets for Students, Courses, Batches, Payments, Attendance, Teachers, Exams, Expenses and Activity Logs (plus a Student Accounts summary). Every stored record is exported, not only what is visible on screen. Student photos are kept in the JSON backup instead.</p>
+                        <button id="fullExcelBtn" onclick="exportFullExcelBackup()" class="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold rounded-xl text-xs shadow flex items-center justify-center gap-2"><i class="fas fa-file-excel"></i> Download Full Excel Backup (.xlsx)</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- CSV Data Export Card -->
+                        <div class="glass-card p-6 rounded-2xl space-y-4">
+                            <h4 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fas fa-file-excel text-emerald-400"></i> Excel / CSV Data Export
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">Export raw structured data tables to CSV files compatible with Microsoft Excel and Google Sheets.</p>
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <button onclick="exportToCSV('students')" class="py-2.5 px-3 glass-card hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-emerald-500/30">
+                                    <i class="fas fa-download"></i> Students CSV
+                                </button>
+                                <button onclick="exportToExcel('students')" class="py-2.5 px-3 glass-card hover:bg-blue-500/20 text-blue-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-blue-500/30"><i class="fas fa-file-excel"></i> Students XLSX</button>
+                                <button onclick="exportToCSV('payments')" class="py-2.5 px-3 glass-card hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-emerald-500/30">
+                                    <i class="fas fa-download"></i> Payments CSV
+                                </button>
+                                <button onclick="exportToExcel('payments')" class="py-2.5 px-3 glass-card hover:bg-blue-500/20 text-blue-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-blue-500/30"><i class="fas fa-file-excel"></i> Payments XLSX</button>
+                                <button onclick="exportToCSV('attendance')" class="py-2.5 px-3 glass-card hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-emerald-500/30">
+                                    <i class="fas fa-download"></i> Attendance CSV
+                                </button>
+                                <button onclick="exportToExcel('attendance')" class="py-2.5 px-3 glass-card hover:bg-blue-500/20 text-blue-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-blue-500/30"><i class="fas fa-file-excel"></i> Attendance XLSX</button>
+                                <button onclick="exportToCSV('expenses')" class="py-2.5 px-3 glass-card hover:bg-emerald-500/20 text-emerald-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-emerald-500/30">
+                                    <i class="fas fa-download"></i> Expenses CSV
+                                </button>
+                                <button onclick="exportToExcel('expenses')" class="py-2.5 px-3 glass-card hover:bg-blue-500/20 text-blue-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-blue-500/30"><i class="fas fa-file-excel"></i> Expenses XLSX</button>
+                            </div>
+                        </div>
+
+                        <!-- JSON Database Backup & Restore Card -->
+                        <div class="glass-card p-6 rounded-2xl space-y-4">
+                            <h4 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fas fa-database text-brand-cyanAccent"></i> JSON Database Backup & Restore
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">Save a complete snapshot of all stored academy records or restore from a previously exported JSON backup file.</p>
+                            <div class="space-y-3 pt-2">
+                                <button onclick="exportJSONBackup()" class="w-full py-3 bg-gradient-to-r from-brand-purpleGlow to-brand-cyanAccent text-white font-bold rounded-xl text-xs shadow flex items-center justify-center gap-2">
+                                    <i class="fas fa-cloud-download-alt text-sm"></i> Export Full JSON Database Backup
+                                </button>
+                                
+                                <div class="relative">
+                                    <input type="file" id="restoreFileInput" onchange="restoreJSONBackup(event)" accept=".json" class="hidden">
+                                    <button onclick="document.getElementById('restoreFileInput').click()" class="w-full py-3 glass-card hover:bg-white/10 text-slate-200 font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-white/20">
+                                        <i class="fas fa-cloud-upload-alt text-sm"></i> Restore Database from JSON File
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. ACTIVITY LOG TAB -->
+                <div id="tab-activity" class="tab-content hidden space-y-6">
+                    <div class="glass-card p-5 rounded-2xl">
+                        <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-stream text-slate-400"></i> Audit Activity Logs
+                        </h3>
+                        <div class="space-y-3 max-h-96 overflow-y-auto pr-2" id="activityLogsList">
+                            <!-- Dynamic Audit Logs -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DIALOG CONTAINERS -->
+    
+    <!-- 1. STUDENT EDIT/ADD MODAL -->
+    <div id="studentModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl p-6 rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 id="studentModalTitle" class="text-lg font-bold text-white">Add New Student</h3>
+                <button onclick="closeModal('studentModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="studentForm" onsubmit="saveStudent(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="studentEditId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <!-- Student Photo Upload -->
+                    <div class="sm:col-span-2 flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10">
+                        <div class="w-24 h-24 rounded-xl border border-white/15 overflow-hidden bg-slate-800 flex items-center justify-center flex-none relative">
+                            <img id="studentPhotoPreview" class="w-full h-full object-cover hidden" alt="Student Photo Preview">
+                            <span id="studentPhotoPlaceholder" class="text-[10px] text-slate-500 text-center px-2">No Photo</span>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <label class="block text-slate-300 mb-1">Student Photo</label>
+                            <input type="file" id="studentPhotoInput" accept="image/*" onchange="handleStudentPhotoSelected(event)" class="glass-input w-full p-2 rounded-xl text-xs">
+                            <div class="flex items-center gap-2 mt-2">
+                                <button type="button" onclick="clearStudentPhoto()" class="px-3 py-1.5 bg-rose-500/20 text-rose-300 rounded-lg text-[11px] border border-rose-500/30">Remove Photo</button>
+                                <span class="text-[10px] text-slate-500">PNG/JPG. Saved with student record.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-300 mb-1">Admission / Student ID <span class="text-slate-500">(auto-generated)</span></label>
+                        <input type="text" id="studentIdNum" readonly tabindex="-1" class="glass-input w-full p-2.5 rounded-xl cursor-not-allowed opacity-90 font-semibold">
+                        <p class="text-[10px] text-slate-500 mt-1">Generated automatically and locked. It never changes when editing.</p>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Full Student Name *</label>
+                        <input type="text" id="studentName" required class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Phone Number *</label>
+                        <input type="text" id="studentPhone" required class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Guardian Info (Name / Phone)</label>
+                        <input type="text" id="studentGuardian" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Assigned Course *</label>
+                        <select id="studentCourseSelect" onchange="populateBatchDropdownModal()" required class="glass-input w-full p-2.5 rounded-xl bg-slate-900">
+                            <!-- Populated -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Assigned Batch *</label>
+                        <select id="studentBatchSelect" required class="glass-input w-full p-2.5 rounded-xl bg-slate-900">
+                            <!-- Populated -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Admission Date *</label>
+                        <input type="date" id="studentAdmissionDate" required class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Student Status</label>
+                        <select id="studentStatus" class="glass-input w-full p-2.5 rounded-xl bg-slate-900">
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Dropped">Dropped</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Due Payment Section -->
+                <div id="studentDuePaymentSection" class="hidden p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-receipt text-emerald-400"></i> Due Payment</h4>
+                        <button type="button" onclick="showStudentAddPaymentRow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-xs">+ Add New Payment / Date</button>
+                    </div>
+                    <div id="studentPaymentSummary" class="grid grid-cols-3 gap-2 text-[11px]"></div>
+                    <div id="studentPaymentList" class="space-y-1 max-h-40 overflow-y-auto pr-1"></div>
+
+                    <div id="studentAddPaymentRow" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-white/10">
+                        <div>
+                            <label class="block text-slate-400 text-[10px] mb-1">Payment Date *</label>
+                            <input type="date" id="studentPaymentDate" class="glass-input w-full p-2 rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 text-[10px] mb-1">Amount (৳) *</label>
+                            <input type="number" id="studentPaymentAmount" min="1" step="any" inputmode="decimal" class="glass-input w-full p-2 rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 text-[10px] mb-1">Method</label>
+                            <select id="studentPaymentMethod" class="glass-input w-full p-2 rounded-lg text-xs bg-slate-900">
+                                <option value="Cash">Cash</option>
+                                <option value="bKash">bKash</option>
+                                <option value="Nagad">Nagad</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Card">Card</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 text-[10px] mb-1">Transaction / Ref ID</label>
+                            <input type="text" id="studentPaymentTxId" placeholder="Optional" class="glass-input w-full p-2 rounded-lg text-xs">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-slate-400 text-[10px] mb-1">Next Payment Date (optional)</label>
+                            <input type="date" id="studentPaymentNextDate" class="glass-input w-full p-2 rounded-lg text-xs">
+                        </div>
+                        <div class="sm:col-span-2 flex gap-2">
+                            <button type="button" onclick="saveStudentInlinePayment()" class="flex-1 px-2 py-2.5 bg-emerald-600 text-white font-bold rounded-lg text-xs">Save Payment</button>
+                            <button type="button" onclick="hideStudentAddPaymentRow()" class="px-3 py-2.5 bg-white/10 text-slate-300 rounded-lg text-xs">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-1">
+                        <button type="button" onclick="printStudentPaymentStatement(document.getElementById('studentIdNum').value)" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-slate-200 rounded-lg text-xs"><i class="fas fa-print mr-1"></i> Print Payment Statement</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-300 mb-1">Full Residential Address</label>
+                    <textarea id="studentAddress" rows="2" class="glass-input w-full p-2.5 rounded-xl"></textarea>
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Notes / Additional Info</label>
+                    <input type="text" id="studentNotes" class="glass-input w-full p-2.5 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('studentModal')" class="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-gradient-to-r from-brand-purpleGlow to-brand-purpleAccent text-white font-bold rounded-xl">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. PAYMENT INSTALLMENT MODAL -->
+    <div id="paymentModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg p-6 rounded-3xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white">Record Money Installment Receipt</h3>
+                <button onclick="closeModal('paymentModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="paymentForm" onsubmit="savePayment(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 mb-1">Select Student *</label>
+                    <select id="paymentStudentSelect" onchange="calculateStudentPaymentDueContext()" required class="glass-input w-full p-2.5 rounded-xl bg-slate-900">
+                        <!-- Populated -->
+                    </select>
+                </div>
+                
+                <!-- Financial Calculation Context Box -->
+                <div id="paymentCalculationBox" class="p-3 bg-white/5 rounded-xl border border-white/10 text-xs space-y-1 text-slate-300">
+                    <div class="flex justify-between"><span>Course Fee:</span><span id="calcCourseFee" class="font-bold text-white">৳ 0</span></div>
+                    <div class="flex justify-between"><span>Previously Paid:</span><span id="calcPrevPaid" class="font-bold text-emerald-400">৳ 0</span></div>
+                    <div class="flex justify-between border-t border-white/10 pt-1"><span class="font-bold text-white">Current Balance Due:</span><span id="calcCurrentDue" class="font-bold text-rose-400">৳ 0</span></div>
+                </div>
+                <div id="paymentHistoryPreview" class="p-3 bg-white/5 rounded-xl border border-white/10 text-[11px] text-slate-300 max-h-36 overflow-y-auto"></div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-1">Payment Amount (৳) *</label>
+                        <input type="number" id="paymentAmount" required min="1" step="any" inputmode="decimal" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Payment Method *</label>
+                        <select id="paymentMethod" required class="glass-input w-full p-2.5 rounded-xl bg-slate-900">
+                            <option value="Cash">Cash</option>
+                            <option value="bKash">bKash</option>
+                            <option value="Nagad">Nagad</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Card">Card</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-1">Payment Date *</label>
+                        <input type="date" id="paymentDate" required onchange="syncPaymentNextMin()" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Transaction / Ref ID</label>
+                        <input type="text" id="paymentTxId" placeholder="Optional" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                </div>
+
+                <div class="p-3 bg-emerald-950/30 rounded-xl border border-emerald-500/20">
+                    <p class="text-[10px] text-emerald-200"><i class="fas fa-check-circle mr-1"></i> Flexible installments: record each payment whenever the student pays. Every entry gets its own payment date and receipt.</p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-300 mb-1">Next Payment Date <span class="text-slate-500">(optional, expected next installment)</span></label>
+                    <input type="date" id="paymentNextDate" class="glass-input w-full p-2.5 rounded-xl">
+                    <p class="text-[10px] text-slate-500 mt-1">Leave empty if not decided. It is saved with this payment and printed on the receipt.</p>
+                </div>
+
+                <div>
+                    <label class="block text-slate-300 mb-1">Notes / Received By</label>
+                    <input type="text" id="paymentNotes" placeholder="Received by Admin" class="glass-input w-full p-2.5 rounded-xl">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('paymentModal')" class="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold rounded-xl">Save & Generate Receipt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. COURSE MODAL -->
+    <div id="courseModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white">Add / Edit Course</h3>
+                <button onclick="closeModal('courseModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="courseForm" onsubmit="saveCourse(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="courseEditId">
+                <div>
+                    <label class="block text-slate-300 mb-1">Course Name *</label>
+                    <input type="text" id="courseName" required class="glass-input w-full p-2.5 rounded-xl" placeholder="e.g. Web Development">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-1">Duration (Months) *</label>
+                        <input type="text" id="courseDuration" required class="glass-input w-full p-2.5 rounded-xl" placeholder="6 Months">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Total Fee (৳) *</label>
+                        <input type="number" id="courseFee" required min="0" class="glass-input w-full p-2.5 rounded-xl" placeholder="10000">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Course Description</label>
+                    <textarea id="courseDesc" rows="2" class="glass-input w-full p-2.5 rounded-xl"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('courseModal')" class="px-4 py-2 text-slate-400">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-purple-600 text-white font-bold rounded-xl">Save Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. BATCH MODAL -->
+    <div id="batchModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white">Add / Edit Batch</h3>
+                <button onclick="closeModal('batchModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="batchForm" onsubmit="saveBatch(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="batchEditId">
+                <div>
+                    <label class="block text-slate-300 mb-1">Batch Code / Name *</label>
+                    <input type="text" id="batchName" required class="glass-input w-full p-2.5 rounded-xl" placeholder="Batch WD-2026">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Associated Course *</label>
+                    <select id="batchCourseSelect" required class="glass-input w-full p-2.5 rounded-xl bg-slate-900"></select>
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Schedule / Time Slot</label>
+                    <input type="text" id="batchSchedule" class="glass-input w-full p-2.5 rounded-xl" placeholder="Sat & Mon (7:00 PM - 9:00 PM)">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Assigned Teacher</label>
+                    <input type="text" id="batchTeacher" class="glass-input w-full p-2.5 rounded-xl" placeholder="Senior Instructor">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('batchModal')" class="px-4 py-2 text-slate-400">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-cyan-600 text-white font-bold rounded-xl">Save Batch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. TEACHER MODAL -->
+    <div id="teacherModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white">Add Faculty / Teacher</h3>
+                <button onclick="closeModal('teacherModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="teacherForm" onsubmit="saveTeacher(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 mb-1">Instructor Name *</label>
+                    <input type="text" id="teacherName" required class="glass-input w-full p-2.5 rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Designation / Specialization</label>
+                    <input type="text" id="teacherDesignation" class="glass-input w-full p-2.5 rounded-xl" placeholder="Lead Instructor">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Phone Contact *</label>
+                    <input type="text" id="teacherPhone" required class="glass-input w-full p-2.5 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('teacherModal')" class="px-4 py-2 text-slate-400">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-pink-600 text-white font-bold rounded-xl">Save Instructor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. EXAM MODAL -->
+    <div id="examModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white">Log Exam Marks</h3>
+                <button onclick="closeModal('examModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="examForm" onsubmit="saveExam(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 mb-1">Exam Title *</label>
+                    <input type="text" id="examTitle" required class="glass-input w-full p-2.5 rounded-xl" placeholder="Midterm Web Exam">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Select Student *</label>
+                    <select id="examStudentSelect" required class="glass-input w-full p-2.5 rounded-xl bg-slate-900"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-1">Marks Secured *</label>
+                        <input type="number" id="examMarks" required max="100" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Grade</label>
+                        <input type="text" id="examGrade" placeholder="A+" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('examModal')" class="px-4 py-2 text-slate-400">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl">Save Exam Result</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 7. EXPENSE MODAL -->
+    <div id="expenseModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl space-y-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white">Log Academy Expense</h3>
+                <button onclick="closeModal('expenseModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="expenseForm" onsubmit="saveExpense(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block text-slate-300 mb-1">Expense Title / Item *</label>
+                    <input type="text" id="expenseName" required class="glass-input w-full p-2.5 rounded-xl" placeholder="Office Electricity Bill">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-300 mb-1">Category *</label>
+                        <select id="expenseCategory" class="glass-input w-full p-2.5 rounded-xl bg-slate-900">
+                            <option value="Utilities">Utilities</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Salaries">Salaries</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1">Amount (৳) *</label>
+                        <input type="number" id="expenseAmount" required min="1" class="glass-input w-full p-2.5 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-1">Date *</label>
+                    <input type="date" id="expenseDate" required class="glass-input w-full p-2.5 rounded-xl">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                    <button type="button" onclick="closeModal('expenseModal')" class="px-4 py-2 text-slate-400">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-rose-600 text-white font-bold rounded-xl">Record Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PRINTABLE PDF TEMPLATE (HIDDEN ON SCREEN, DISPLAYED ON PRINT) -->
+    
+    <!-- PDF TEMPLATE 01: STUDENT BIODATA PRINT DOCUMENT -->
+    <div id="printStudentBiodata" class="print-only print-container font-sans text-black">
+        <div class="border-4 border-slate-900 p-8 space-y-6">
+            <!-- Header with Official Easy IT Academy Logo -->
+            <div class="flex justify-between items-center border-b-2 border-slate-900 pb-4">
+                <div>
+                    <div class="print-brand"><div class="print-logo"><svg viewBox="0 0 64 64"><rect x="3" y="3" width="58" height="58" rx="15" fill="#eff6ff"/><path d="M16 18h32v7H23v6h20v7H23v6h25v7H16z" fill="#1769e8"/><rect x="39" y="10" width="6" height="6" rx="1" fill="#06b6d4"/><rect x="47" y="10" width="6" height="6" rx="1" fill="#60a5fa"/></svg></div><div><h1 class="text-3xl font-extrabold tracking-tight text-blue-700">EASY IT ACADEMY</h1><p class="text-xs text-slate-700">Gazipur, Bhager Bazar<br>Bhai Bhai Super Market, 2nd Floor</p><p class="text-xs font-bold text-blue-800">01776742677</p><p class="text-xs font-semibold text-slate-600 tracking-wider uppercase">Official Student Profile & Biodata</p></div></div>
+                </div>
+                <div class="text-right text-xs">
+                    <p><strong>Generated Date:</strong> <span id="bioPrintGeneratedDate"></span></p>
+                    <p><strong>Document Ref:</strong> EASYIT-BIO-2026</p>
+                </div>
+            </div>
+
+            <!-- Student Biodata Body Details -->
+            <div class="grid grid-cols-3 gap-6 pt-4">
+                <!-- Avatar & ID Banner -->
+                <div class="col-span-1 border border-slate-300 p-4 text-center rounded space-y-3">
+                    <div class="w-32 h-36 bg-slate-100 border border-slate-400 mx-auto flex items-center justify-center text-slate-400 text-xs font-semibold overflow-hidden relative">
+                        <img id="bioPrintPhoto" class="w-full h-full object-cover hidden" alt="Student Photo">
+                        <span id="bioPrintPhotoPlaceholder" class="absolute inset-0 flex items-center justify-center text-slate-400 text-xs font-semibold">STUDENT PHOTO</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase">Admission ID</p>
+                        <p id="bioPrintId" class="text-lg font-bold text-slate-900"></p>
+                    </div>
+                </div>
+
+                <!-- Personal Information Table -->
+                <div class="col-span-2 space-y-3 text-sm">
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Full Name:</span>
+                        <span id="bioPrintName" class="text-slate-900"></span>
+                    </div>
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Phone Contact:</span>
+                        <span id="bioPrintPhone" class="text-slate-900"></span>
+                    </div>
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Guardian Contact:</span>
+                        <span id="bioPrintGuardian" class="text-slate-900"></span>
+                    </div>
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Enrolled Course:</span>
+                        <span id="bioPrintCourse" class="text-slate-900"></span>
+                    </div>
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Assigned Batch:</span>
+                        <span id="bioPrintBatch" class="text-slate-900"></span>
+                    </div>
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Admission Date:</span>
+                        <span id="bioPrintAdmissionDate" class="text-slate-900"></span>
+                    </div>
+                    <div class="grid grid-cols-2 border-b border-slate-200 pb-1.5">
+                        <span class="font-bold text-slate-700">Residential Address:</span>
+                        <span id="bioPrintAddress" class="text-slate-900"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signature Block -->
+            <div class="pt-24 flex justify-between text-xs">
+                <div class="text-center border-t border-slate-800 w-48 pt-1">
+                    Student Signature
+                </div>
+                <div class="text-center border-t border-slate-800 w-48 pt-1">
+                    Authorized Officer Signature
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="toastBox" aria-live="polite"></div>
+    <div id="printArea"></div>
+
+    <!-- COMPLETE CLIENT-SIDE LOGIC ENGINE (INDEXEDDB & SPA LOGIC) -->
+    <script>
+        // --- 1. LOCAL INDEXEDDB STORAGE ENGINE SETUP ---
+        const DB_NAME = 'EasyITAcademyDB';
+        const DB_VERSION = 1;
+        let db;
+        let currentStudentPhotoData = '';
+
+        let storageMode = 'indexedDB';
+
+        function initDatabase() {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!('indexedDB' in window) || !window.indexedDB) {
+                        reject(new Error('IndexedDB is unavailable in this browser context.'));
+                        return;
+                    }
+                    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onerror = () => reject(request.error || new Error('IndexedDB could not be opened.'));
+                    request.onblocked = () => reject(new Error('Database is blocked by another open tab.'));
+                    request.onsuccess = (e) => {
+                        db = e.target.result;
+                        db.onversionchange = () => db.close();
+                        resolve(db);
+                    };
+                    request.onupgradeneeded = (e) => {
+                        const database = e.target.result;
+                        ['students','courses','batches','payments','attendance','teachers','exams','expenses','logs']
+                            .forEach(name => {
+                                if (!database.objectStoreNames.contains(name)) {
+                                    database.createObjectStore(name, { keyPath: 'id' });
+                                }
+                            });
+                    };
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        // Use IndexedDB normally; fall back to localStorage if the browser blocks it.
+        const databaseReady = initDatabase().catch((err) => {
+            console.warn('IndexedDB unavailable; switching to localStorage:', err);
+            try {
+                const testKey = '__easyit_storage_test__';
+                localStorage.setItem(testKey, '1');
+                localStorage.removeItem(testKey);
+                storageMode = 'localStorage';
+                return true;
+            } catch (storageError) {
+                throw new Error('Browser storage is blocked. Open this file in Chrome and allow site storage.');
+            }
+        });
+
+        // Generic Database Helper Functions
+        async function getAllRecords(storeName) {
+            await databaseReady;
+            if (storageMode === 'localStorage') {
+                try { return JSON.parse(localStorage.getItem('easyit_' + storeName) || '[]'); }
+                catch (err) { console.error('Could not read local records:', err); return []; }
+            }
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readonly');
+                const request = tx.objectStore(storeName).getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveRecord(storeName, record) {
+            await databaseReady;
+            if (storageMode === 'localStorage') {
+                const records = JSON.parse(localStorage.getItem('easyit_' + storeName) || '[]');
+                const index = records.findIndex(item => item.id === record.id);
+                if (index >= 0) records[index] = record; else records.push(record);
+                localStorage.setItem('easyit_' + storeName, JSON.stringify(records));
+                return true;
+            }
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                tx.objectStore(storeName).put(record);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function deleteRecord(storeName, key) {
+            await databaseReady;
+            if (storageMode === 'localStorage') {
+                const records = JSON.parse(localStorage.getItem('easyit_' + storeName) || '[]')
+                    .filter(item => item.id !== key);
+                localStorage.setItem('easyit_' + storeName, JSON.stringify(records));
+                return true;
+            }
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                tx.objectStore(storeName).delete(key);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        function addAuditLog(action) {
+            const logEntry = {
+                id: 'LOG-' + Date.now(),
+                action: action,
+                user: currentUser ? currentUser.username : 'System',
+                timestamp: new Date().toLocaleString()
+            };
+            saveRecord('logs', logEntry);
+        }
+
+        // --- 2. AUTHENTICATION ENGINE ---
+        let currentUser = null;
+
+        // Robust login handler: expose globally for the form's inline onsubmit.
+        window.handleLogin = async function (e) {
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            const usernameEl = document.getElementById('loginUsername');
+            const passwordEl = document.getElementById('loginPassword');
+            const errorEl = document.getElementById('loginError');
+            const loginEl = document.getElementById('loginSection');
+            const appEl = document.getElementById('appContainer');
+            const u = (usernameEl?.value || '').trim().toLowerCase();
+            const p = (passwordEl?.value || '').trim();
+
+            // Keep original credentials; accept the previously communicated variant too.
+            const validLogin = u === 'easyit' && (p === '1234' || p === 'easyit1234');
+            if (!validLogin) {
+                if (errorEl) errorEl.classList.remove('hidden');
+                if (passwordEl) { passwordEl.focus(); passwordEl.select(); }
+                return false;
+            }
+
+            try {
+                await databaseReady;
+            } catch (dbError) {
+                console.error('Database initialization failed:', dbError);
+                if (errorEl) {
+                    errorEl.textContent = 'Browser storage is blocked. Open this HTML file in Chrome (not an in-app preview) and allow site storage.';
+                    errorEl.classList.remove('hidden');
+                }
+                return false;
+            }
+
+            currentUser = { username: 'easyit', role: 'Admin' };
+            if (errorEl) errorEl.classList.add('hidden');
+            if (loginEl) loginEl.classList.add('hidden');
+            if (appEl) appEl.classList.remove('hidden');
+            const nameEl = document.getElementById('currentUserName');
+            const roleEl = document.getElementById('currentUserRole');
+            const badgeEl = document.getElementById('userRoleBadge');
+            if (nameEl) nameEl.innerText = currentUser.username;
+            if (roleEl) roleEl.innerText = currentUser.role;
+            if (badgeEl) badgeEl.innerText = 'A';
+            try { addAuditLog('User Logged In'); } catch (err) { console.warn('Audit log skipped:', err); }
+            try { refreshAllDataViews(); } catch (err) { console.error('Dashboard refresh issue:', err); }
+            return false;
+        };
+
+        // Backup listener ensures login works even if inline onsubmit is blocked.
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const pass = document.getElementById('loginPassword');
+            const error = document.getElementById('loginError');
+            // Login is handled by the form's onsubmit handler below.
+            [document.getElementById('loginUsername'), pass].forEach(el => {
+                if (el) el.addEventListener('input', () => error?.classList.add('hidden'));
+            });
+        });
+
+        function handleLogout() {
+            addAuditLog('User Logged Out');
+            currentUser = null;
+            document.getElementById('appContainer').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // --- 3. UI NAVIGATION & TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav a').forEach(el => el.classList.remove('nav-active'));
+            
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const navBtn = document.getElementById('nav-' + tabId);
+            if (navBtn) navBtn.classList.add('nav-active');
+
+            const pageTitles = {
+                dashboard: 'Overview Dashboard',
+                students: 'Student Records Directory',
+                courses: 'Courses & Batch Operations',
+                payments: 'Installments & Payments Ledger',
+                attendance: 'Batch Attendance System',
+                teachers: 'Faculty & Staff Registry',
+                exams: 'Exam Marks & Academic Results',
+                financials: 'Income & Expense Tracker',
+                reports: 'Exports & Database Backup',
+                activity: 'Audit Activity Logs'
+            };
+            document.getElementById('pageTitle').innerText = pageTitles[tabId] || 'Academy Management System';
+
+            // Close mobile sidebar if open
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // --- 4. DATA REFRESH & SYNCHRONIZATION ---
+        async function refreshAllDataViews() {
+            await renderDashboardMetrics();
+            await renderStudentsTable();
+            await renderCoursesAndBatches();
+            await renderPaymentsTable();
+            await populateAttendanceControls();
+            await renderTeachersGrid();
+            await renderExamsTable();
+            await renderExpensesTable();
+            await renderActivityLogs();
+        }
+
+        // --- 5. DASHBOARD ENGINE & ANALYTICS ---
+        async function renderDashboardMetrics() {
+            const students = await getAllRecords('students');
+            const courses = await getAllRecords('courses');
+            const batches = await getAllRecords('batches');
+            const payments = await getAllRecords('payments');
+            const teachers = await getAllRecords('teachers');
+            const expenses = await getAllRecords('expenses');
+
+            // Metric Calculations
+            const totalStudents = students.length;
+            const activeStudents = students.filter(s => s.status === 'Active').length;
+            const totalCourses = courses.length;
+            const totalBatches = batches.length;
+
+            const totalCollection = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+            
+            // Due Balance Calculation
+            let totalDue = 0;
+            students.forEach(s => {
+                const course = courses.find(c => c.id === s.courseId);
+                const courseFee = course ? Number(course.fee || 0) : 0;
+                const studentPayments = payments.filter(p => p.studentId === s.id);
+                const paid = studentPayments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+                const due = courseFee - paid;
+                if (due > 0) totalDue += due;
+            });
+
+            const totalExpensesVal = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+            // Set UI Metrics
+            document.getElementById('statTotalStudents').innerText = totalStudents;
+            document.getElementById('statActiveStudents').innerText = `${activeStudents} Active Enrolled`;
+            document.getElementById('statTotalCourses').innerText = totalCourses;
+            document.getElementById('statTotalBatches').innerText = `${totalBatches} Active Batches`;
+            document.getElementById('statTotalCollection').innerText = `৳ ${totalCollection.toLocaleString()}`;
+            document.getElementById('statTotalDue').innerText = `৳ ${totalDue.toLocaleString()}`;
+            document.getElementById('statTeachersCount').innerText = teachers.length;
+            document.getElementById('statTotalExpenses').innerText = `৳ ${totalExpensesVal.toLocaleString()}`;
+            document.getElementById('statNetBalance').innerText = `৳ ${(totalCollection - totalExpensesVal).toLocaleString()}`;
+
+            // Render Recent Payments (newest first, based purely on the flexible payment ledger)
+            const recentPayments = sortPaymentsChronologically(payments).reverse().slice(0, 5);
+            const recentBody = document.getElementById('recentPaymentsTable');
+            if (recentPayments.length === 0) {
+                recentBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">No payment transactions recorded yet.</td></tr>`;
+            } else {
+                recentBody.innerHTML = recentPayments.map(p => {
+                    const st = students.find(s => s.id === p.studentId);
+                    return `
+                        <tr>
+                            <td class="p-3 font-mono text-cyan-400">${p.id}</td>
+                            <td class="p-3 font-semibold text-white">${st ? st.name : 'Unknown Student'}</td>
+                            <td class="p-3">${p.date}</td>
+                            <td class="p-3">${p.method}</td>
+                            <td class="p-3 font-bold text-emerald-400">৳ ${Number(p.amount).toLocaleString()}</td>
+                            <td class="p-3 text-right">
+                                <button onclick="printPaymentSlip('${p.id}')" class="px-2 py-1 bg-white/10 hover:bg-white/20 text-slate-200 rounded text-[10px]">
+                                    <i class="fas fa-print mr-1"></i> Receipt
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Draw Financial Breakdown Canvas Chart
+            drawFinancialChart(totalCollection, totalExpensesVal, totalDue);
+        }
+
+        function drawFinancialChart(collection, expenses, due) {
+            const canvas = document.getElementById('financialChartCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = 200;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const data = [
+                { label: 'Total Collection', val: collection, color: '#00e5ff' },
+                { label: 'Total Expenses', val: expenses, color: '#f43f5e' },
+                { label: 'Pending Dues', val: due, color: '#fbbf24' }
+            ];
+
+            const maxVal = Math.max(collection, expenses, due, 1000);
+            const barWidth = 60;
+            const gap = (canvas.width - (data.length * barWidth)) / (data.length + 1);
+
+            data.forEach((item, index) => {
+                const x = gap + index * (barWidth + gap);
+                const barHeight = (item.val / maxVal) * 120;
+                const y = canvas.height - barHeight - 30;
+
+                // Draw Bar
+                ctx.fillStyle = item.color;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, Math.max(2, barHeight), 8);
+                ctx.fill();
+
+                // Bar label and amount
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '11px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.label, x + barWidth / 2, canvas.height - 10);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px Arial';
+                ctx.fillText('৳' + Number(item.val || 0).toLocaleString('en-BD'), x + barWidth / 2, Math.max(14, y - 7));
+            });
+        }
+
+        // Ensure the database is ready even if the browser fires DOMContentLoaded
+        // before a user submits the login form.
+        window.addEventListener('error', (event) => console.error('Application error:', event.error || event.message));
+    </script>
+<script>
+/* Easy IT Academy: completed application actions */
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const money = n => '৳ ' + Number(n||0).toLocaleString('en-BD');
+const uid = prefix => prefix + '-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const get = id => $(id)?.value?.trim() || '';
+const set = (id,v) => { if($(id)) $(id).value = v ?? ''; };
+const show = id => $(id)?.classList.remove('hidden');
+const hide = id => $(id)?.classList.add('hidden');
+const records = name => getAllRecords(name);
+const save = (name, obj) => saveRecord(name,obj);
+const remove = (name,id) => deleteRecord(name,id);
+let photoData = '';
+let attendanceDraft = {};
+/* ---- Automatic Student ID generation (EIT-0001, EIT-0002, ...) ---- */
+let studentSaving = false;
+const ID_PREFIX='EIT-', ID_PAD=4, ID_SEQ_KEY='easyit_studentIdSeq';
+function idNum(v){const m=/^EIT-(\d+)$/i.exec(String(v==null?'':v).trim());return m?parseInt(m[1],10):0;}
+function readIdSeq(){try{return parseInt(localStorage.getItem(ID_SEQ_KEY)||'0',10)||0;}catch(e){return 0;}}
+function writeIdSeq(n){try{if(n>readIdSeq())localStorage.setItem(ID_SEQ_KEY,String(n));}catch(e){}}
+/* Next ID = highest of (saved counter, every existing EIT-number) + 1, skipping any ID already in use. */
+async function nextStudentId(){
+ const all=await records('students');
+ const used=new Set(all.map(s=>String(s.admissionId==null?'':s.admissionId).trim().toLowerCase()));
+ let n=all.reduce((m,s)=>Math.max(m,idNum(s.admissionId)),readIdSeq())+1,id;
+ do{id=ID_PREFIX+String(n).padStart(ID_PAD,'0');n++;}while(used.has(id.toLowerCase()));
+ return id;
+}
+
+window.handleLogin = async function(e){
+ if(e) e.preventDefault();
+ const u=get('loginUsername').toLowerCase(), p=get('loginPassword');
+ const err=$('loginError');
+ if(u!=='easyit'||p!=='1234') { if(err){err.textContent='Invalid username or password.';show('loginError');} return false; }
+ try { await databaseReady; } catch(ex) { if(err){err.textContent='Browser storage is blocked. Open this file in Chrome and allow storage.';show('loginError');} console.error(ex); return false; }
+ currentUser={username:'easyit',role:'Admin'}; hide('loginError'); hide('loginSection'); show('appContainer');
+ if($('currentUserName')) $('currentUserName').textContent='easyit'; if($('currentUserRole')) $('currentUserRole').textContent='Admin'; if($('userRoleBadge')) $('userRoleBadge').textContent='A';
+ if($('currentDateDisplay')) $('currentDateDisplay').textContent=new Date().toLocaleDateString();
+ try { await refreshAllDataViews(); addAuditLog('User Logged In'); } catch(ex){console.error(ex); alert('Dashboard load error: '+ex.message);}
+ return false;
+};
+window.handleLogout=function(){try{addAuditLog('User Logged Out')}catch(e){} currentUser=null; hide('appContainer'); show('loginSection'); set('loginPassword','');};
+
+window.openStudentModal=async function(id){
+ $('studentForm')?.reset(); set('studentEditId',''); photoData=''; clearStudentPhoto();
+ await populateFormOptions();
+ hide('studentDuePaymentSection'); hide('studentAddPaymentRow');
+ if(id){const s=(await records('students')).find(x=>x.id===id);if(!s)return;set('studentEditId',s.id);set('studentIdNum',s.admissionId);set('studentName',s.name);set('studentPhone',s.phone);set('studentGuardian',s.guardian);set('studentCourseSelect',s.courseId);await populateBatchDropdownModal();set('studentBatchSelect',s.batchId);set('studentAdmissionDate',s.admissionDate);set('studentStatus',s.status);set('studentAddress',s.address);set('studentNotes',s.notes);photoData=s.photo||'';if(photoData){$('studentPhotoPreview').src=photoData;show('studentPhotoPreview');hide('studentPhotoPlaceholder');} $('studentModalTitle').textContent='Edit Student';show('studentDuePaymentSection');await renderStudentPaymentSummary(s.id);}else{$('studentModalTitle').textContent='Add New Student';set('studentAdmissionDate',today());try{set('studentIdNum',await nextStudentId());}catch(idErr){console.error(idErr);}}
+ show('studentModal');
+};
+window.saveStudent=async function(e){e.preventDefault();if(studentSaving)return;studentSaving=true;try{const editId=get('studentEditId');const oldRec=editId?(await records('students')).find(x=>x.id===editId):null;const newAdmissionId=editId?'':await nextStudentId();const data={id:editId||uid('STU'),admissionId:editId?(oldRec?oldRec.admissionId:get('studentIdNum')):newAdmissionId,name:get('studentName'),phone:get('studentPhone'),guardian:get('studentGuardian'),courseId:get('studentCourseSelect'),batchId:get('studentBatchSelect'),admissionDate:get('studentAdmissionDate'),status:get('studentStatus')||'Active',address:get('studentAddress'),notes:get('studentNotes'),photo:photoData,updatedAt:new Date().toISOString()};if(!data.courseId)throw Error('Please add/select a course first.');if(!data.batchId)throw Error('Please add/select a batch first.');if(!editId){const all=await records('students');if(all.some(x=>x.admissionId===data.admissionId))throw Error('This Student ID already exists.');}await save('students',data);if(!editId)writeIdSeq(idNum(data.admissionId));addAuditLog((editId?'Updated':'Added')+' student '+data.name);hide('studentModal');await refreshAllDataViews();}catch(err){alert(err.message||'Could not save student.');}finally{studentSaving=false;}};
+window.handleStudentPhotoSelected=function(e){const f=e.target.files?.[0];if(!f)return;if(!f.type.startsWith('image/')){alert('Please choose an image file.');return;}if(f.size>2*1024*1024){alert('Photo must be under 2 MB.');e.target.value='';return;}const r=new FileReader();r.onload=()=>{photoData=r.result;$('studentPhotoPreview').src=photoData;show('studentPhotoPreview');hide('studentPhotoPlaceholder');};r.readAsDataURL(f);};
+window.clearStudentPhoto=function(){photoData='';if($('studentPhotoInput'))$('studentPhotoInput').value='';if($('studentPhotoPreview')){$('studentPhotoPreview').src='';hide('studentPhotoPreview');}show('studentPhotoPlaceholder');};
+window.populateBatchDropdownModal=async function(){const cid=get('studentCourseSelect'), batches=await records('batches');$('studentBatchSelect').innerHTML='<option value="">Choose Batch</option>'+batches.filter(b=>!cid||b.courseId===cid).map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');};
+async function populateFormOptions(){const [courses,batches,students]=await Promise.all([records('courses'),records('batches'),records('students')]);const courseOptions='<option value="">Choose Course</option>'+courses.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');['studentCourseSelect','batchCourseSelect'].forEach(id=>{if($(id))$(id).innerHTML=courseOptions;});if($('studentBatchSelect'))$('studentBatchSelect').innerHTML='<option value="">Choose Batch</option>'+batches.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');const stOpts='<option value="">Choose Student</option>'+students.map(s=>`<option value="${esc(s.id)}">${esc(s.name)} (${esc(s.admissionId)})</option>`).join('');['paymentStudentSelect','examStudentSelect'].forEach(id=>{if($(id))$(id).innerHTML=stOpts;});}
+
+window.openCourseModal=async function(id){$('courseForm').reset();set('courseEditId','');if(id){const c=(await records('courses')).find(x=>x.id===id);if(!c)return;set('courseEditId',id);set('courseName',c.name);set('courseDuration',c.duration);set('courseFee',c.fee);set('courseDesc',c.description);}show('courseModal');};
+window.saveCourse=async function(e){e.preventDefault();try{const id=get('courseEditId');const c={id:id||uid('CRS'),name:get('courseName'),duration:get('courseDuration'),fee:Number(get('courseFee')),description:get('courseDesc')};await save('courses',c);addAuditLog('Saved course '+c.name);hide('courseModal');await refreshAllDataViews();}catch(err){alert(err.message);}};
+window.openBatchModal=async function(id){$('batchForm').reset();set('batchEditId','');await populateFormOptions();if(id){const b=(await records('batches')).find(x=>x.id===id);if(!b)return;set('batchEditId',id);set('batchName',b.name);set('batchCourseSelect',b.courseId);set('batchSchedule',b.schedule);set('batchTeacher',b.teacher);}show('batchModal');};
+window.saveBatch=async function(e){e.preventDefault();try{const id=get('batchEditId');const b={id:id||uid('BAT'),name:get('batchName'),courseId:get('batchCourseSelect'),schedule:get('batchSchedule'),teacher:get('batchTeacher')};if(!b.courseId)throw Error('Add a course before creating a batch.');await save('batches',b);addAuditLog('Saved batch '+b.name);hide('batchModal');await refreshAllDataViews();}catch(err){alert(err.message);}};
+window.openPaymentModal=async function(sid){$('paymentForm').reset();await populateFormOptions();if(typeof sid==='string'&&sid)set('paymentStudentSelect',sid);set('paymentDate',today());set('paymentNextDate','');syncPaymentNextMin();await calculateStudentPaymentDueContext();show('paymentModal');};
+window.calculateStudentPaymentDueContext=async function(){const sid=get('paymentStudentSelect'),[st,cs,ps]=await Promise.all(['students','courses','payments'].map(records));const s=st.find(x=>x.id===sid);const L=s?buildLedger(s,cs.find(c=>c.id===s.courseId),ps):{fee:0,paid:0,due:0,rows:[],nextDate:''};if($('calcCourseFee'))$('calcCourseFee').textContent=money(L.fee);if($('calcPrevPaid'))$('calcPrevPaid').textContent=money(L.paid);if($('calcCurrentDue'))$('calcCurrentDue').textContent=money(L.due);const box=$('paymentHistoryPreview');if(box){box.innerHTML=s?('<p class="text-[10px] uppercase tracking-wider text-slate-400 mb-1">Payment history (oldest first)</p>'+(L.rows.map(r=>`<div class="flex justify-between gap-2 border-b border-white/5 py-1"><span>${esc(fmtDate(r.p.date))} · ${esc(r.p.method)}</span><b class="text-emerald-300">${money(r.p.amount)}</b></div>`).join('')||'<p class="text-slate-500">No payments recorded yet.</p>')+(L.nextDate&&L.due>0?`<p class="mt-1 text-cyan-300">Next payment date on file: <b>${esc(fmtDate(L.nextDate))}</b></p>`:'')):'';}};
+window.savePayment=async function(e){e.preventDefault();if(paySaving)return;const btn=e.target.querySelector('[type=submit]');paySaving=true;if(btn)btn.disabled=true;try{const sid=get('paymentStudentSelect');if(!sid)throw Error('Select a student.');const [st,cs,ps]=await Promise.all(['students','courses','payments'].map(records));const s=st.find(x=>x.id===sid);if(!s)throw Error('Student record not found.');const L=buildLedger(s,cs.find(c=>c.id===s.courseId),ps);const amount=Math.round(Number(get('paymentAmount'))*100)/100,date=get('paymentDate'),next=get('paymentNextDate');const err=checkPayment(amount,date,next,L.due,L.fee);if(err)throw Error(err);if(!confirmFuture(date))return;const remaining=Math.round((L.fee-L.paid-amount)*100)/100;const p={id:uid('PAY'),studentId:sid,amount,method:get('paymentMethod')||'Cash',date,transactionId:get('paymentTxId'),notes:get('paymentNotes'),nextPaymentDate:(remaining>0&&next)?next:'',createdAt:Date.now()};await save('payments',p);addAuditLog('Received payment '+money(amount)+' from '+s.name);hide('paymentModal');await refreshAllDataViews();toast('Payment saved. Remaining due: '+money(Math.max(0,remaining)),'success');await printPaymentSlip(p.id);}catch(err){toast(err.message||'Payment could not be saved.','error');}finally{paySaving=false;if(btn)btn.disabled=false;}};
+
+window.openTeacherModal=function(){$('teacherForm').reset();show('teacherModal');};
+window.saveTeacher=async function(e){e.preventDefault();const t={id:uid('TCH'),name:get('teacherName'),designation:get('teacherDesignation'),phone:get('teacherPhone')};try{await save('teachers',t);hide('teacherModal');await refreshAllDataViews();}catch(err){alert(err.message);}};
+window.openExamModal=async function(){$('examForm').reset();await populateFormOptions();show('examModal');};
+window.saveExam=async function(e){e.preventDefault();const x={id:uid('EXM'),title:get('examTitle'),studentId:get('examStudentSelect'),marks:Number(get('examMarks')),grade:get('examGrade'),date:today()};try{await save('exams',x);hide('examModal');await refreshAllDataViews();}catch(err){alert(err.message);}};
+window.openExpenseModal=function(){$('expenseForm').reset();set('expenseDate',today());show('expenseModal');};
+window.saveExpense=async function(e){e.preventDefault();const x={id:uid('EXP'),name:get('expenseName'),category:get('expenseCategory'),amount:Number(get('expenseAmount')),date:get('expenseDate')};try{await save('expenses',x);hide('expenseModal');await refreshAllDataViews();}catch(err){alert(err.message);}};
+
+window.refreshAllDataViews=async function(){await Promise.all([renderDashboardMetrics(),renderStudentsTable(),renderCoursesAndBatches(),renderPaymentsTable(),populateAttendanceControls(),renderTeachersGrid(),renderExamsTable(),renderExpensesTable(),renderActivityLogs()]);};
+window.renderDashboardMetrics=async function(){const [st,cs,bs,ps,ts,es]=await Promise.all(['students','courses','batches','payments','teachers','expenses'].map(records));const collected=ps.reduce((a,p)=>a+Number(p.amount||0),0),spent=es.reduce((a,x)=>a+Number(x.amount||0),0);let due=0;st.forEach(s=>{due+=buildLedger(s,cs.find(c=>c.id===s.courseId),ps).due;});const vals={statTotalStudents:st.length,statActiveStudents:st.filter(s=>s.status==='Active').length+' Active Enrolled',statTotalCourses:cs.length,statTotalBatches:bs.length+' Active Batches',statTotalCollection:money(collected),statTotalDue:money(due),statTeachersCount:ts.length,statTotalExpenses:money(spent),statNetBalance:money(collected-spent)};Object.entries(vals).forEach(([id,v])=>{if($(id))$(id).textContent=v;});const recent=ps.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||payTime(b)-payTime(a)).slice(0,5);const tbody=$('recentPaymentsTable');if(tbody)tbody.innerHTML=recent.map(p=>{const s=st.find(x=>x.id===p.studentId);return `<tr><td class="p-3 font-mono text-cyan-400 whitespace-nowrap">${esc(p.id)}</td><td class="p-3 font-semibold text-white">${esc(s?.name||'Unknown Student')}</td><td class="p-3">${esc(fmtDate(p.date))}</td><td class="p-3">${esc(p.method)}</td><td class="p-3 font-bold text-emerald-400">${money(p.amount)}</td><td class="p-3 text-right"><button onclick="printPaymentSlip('${esc(p.id)}')" class="px-2 py-1 bg-white/10 hover:bg-white/20 text-slate-200 rounded text-[10px] whitespace-nowrap"><i class="fas fa-print mr-1"></i> Receipt</button></td></tr>`}).join('')||'<tr><td colspan="6" class="p-4 text-center text-slate-500">No payment transactions recorded yet.</td></tr>';window.__chartVals=[collected,spent,due];drawFinancialChart(collected,spent,due);};
+window.renderStudentsTable=async function(){const [st,cs,bs]=await Promise.all(['students','courses','batches'].map(records));const q=get('studentSearchInput').toLowerCase(),filter=get('studentCourseFilter');if($('studentCourseFilter'))$('studentCourseFilter').innerHTML='<option value="">All Courses</option>'+cs.map(c=>`<option value="${esc(c.id)}" ${filter===c.id?'selected':''}>${esc(c.name)}</option>`).join('');const rows=st.filter(s=>(!filter||s.courseId===filter)&&(!q||[s.name,s.admissionId,s.phone].some(v=>String(v||'').toLowerCase().includes(q))));$('studentsTableBody').innerHTML=rows.map(s=>`<tr class="border-b border-white/5"><td class="p-3">${esc(s.admissionId)}</td><td class="p-3"><div class="flex items-center gap-2">${safePhoto(s.photo)?`<img src="${safePhoto(s.photo)}" class="w-8 h-8 rounded-full object-cover" alt="">`:''}<span>${esc(s.name)}</span></div><small>${esc(s.phone)}</small></td><td class="p-3">${esc(cs.find(c=>c.id===s.courseId)?.name||'-')} / ${esc(bs.find(b=>b.id===s.batchId)?.name||'-')}</td><td class="p-3">${esc(s.admissionDate)}</td><td class="p-3">${esc(s.status)}</td><td class="p-3 whitespace-nowrap"><button onclick="openStudentModal('${esc(s.id)}')" class="text-cyan-300 mr-2">Edit</button><button onclick="openPaymentModal('${esc(s.id)}')" class="text-amber-300 mr-2">Pay</button><button onclick="printStudentBiodata('${esc(s.id)}')" class="text-emerald-300 mr-2">PDF</button><button onclick="deleteItem('students','${esc(s.id)}')" class="text-rose-300">Delete</button></td></tr>`).join('')||'<tr><td colspan="6" class="p-5 text-center text-slate-400">No students found. Add your first student.</td></tr>';};
+window.renderCoursesAndBatches=async function(){const [cs,bs,st]=await Promise.all(['courses','batches','students'].map(records));$('coursesListContainer').innerHTML=cs.map(c=>`<div class="glass-card p-4 rounded-xl flex justify-between gap-3"><div><b>${esc(c.name)}</b><p class="text-xs text-slate-400">${esc(c.duration)} · ${money(c.fee)}</p><p class="text-xs">${esc(c.description)}</p></div><div><button onclick="openCourseModal('${esc(c.id)}')" class="text-cyan-300 mr-2">Edit</button><button onclick="deleteItem('courses','${esc(c.id)}')" class="text-rose-300">Delete</button></div></div>`).join('')||'<p class="text-slate-400 text-sm p-3">No courses added yet.</p>';$('batchesListContainer').innerHTML=bs.map(b=>`<div class="glass-card p-4 rounded-xl flex justify-between gap-3"><div><b>${esc(b.name)}</b><p class="text-xs text-slate-400">${esc(cs.find(c=>c.id===b.courseId)?.name||'-')} · ${esc(b.schedule)}</p><p class="text-xs">Teacher: ${esc(b.teacher||'-')} · Students: ${st.filter(s=>s.batchId===b.id).length}</p></div><div><button onclick="openBatchModal('${esc(b.id)}')" class="text-cyan-300 mr-2">Edit</button><button onclick="deleteItem('batches','${esc(b.id)}')" class="text-rose-300">Delete</button></div></div>`).join('')||'<p class="text-slate-400 text-sm p-3">No batches added yet.</p>';};
+window.renderPaymentsTable=async function(){const [ps,st]=await Promise.all(['payments','students'].map(records));const rows=ps.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')||payTime(b)-payTime(a));$('paymentsTableBody').innerHTML=rows.map(p=>{const s=st.find(x=>x.id===p.studentId);return `<tr class="border-b border-white/5"><td class="p-3 font-mono text-cyan-400 whitespace-nowrap">${esc(p.id)}</td><td class="p-3"><div class="font-semibold text-white">${esc(s?.name||'Unknown / Deleted Student')}</div><small class="text-slate-400">${esc(s?.admissionId||'')}</small></td><td class="p-3 whitespace-nowrap">${esc(fmtDate(p.date))}</td><td class="p-3">${esc(p.method)}</td><td class="p-3 font-bold text-emerald-400 whitespace-nowrap">${money(p.amount)}</td><td class="p-3">${esc(p.transactionId||'-')}</td><td class="p-3 whitespace-nowrap">${isISO(p.nextPaymentDate)?esc(fmtDate(p.nextPaymentDate)):'<span class="text-slate-500">Not Set</span>'}</td><td class="p-3 whitespace-nowrap text-right"><button onclick="printPaymentSlip('${esc(p.id)}')" class="text-cyan-300 mr-2">Print</button>${s?`<button onclick="openStudentModal('${esc(s.id)}')" class="text-amber-300 mr-2">History</button>`:''}<button onclick="deleteItem('payments','${esc(p.id)}')" class="text-rose-300">Delete</button></td></tr>`}).join('')||'<tr><td colspan="8" class="p-4 text-center">No payments recorded.</td></tr>';};
+window.populateAttendanceControls=async function(){const bs=await records('batches');if($('attendanceBatchSelect'))$('attendanceBatchSelect').innerHTML='<option value="">Choose Batch</option>'+bs.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');if($('attendanceDate')&&!$('attendanceDate').value)$('attendanceDate').value=today();await renderAttendanceSheet();};
+window.renderAttendanceSheet=async function(){const bid=get('attendanceBatchSelect'),date=get('attendanceDate')||today(),[st,ats]=await Promise.all(['students','attendance'].map(records));const members=st.filter(s=>s.batchId===bid);$('attendanceSheetBody').innerHTML=members.map(s=>{const a=ats.find(x=>x.studentId===s.id&&x.batchId===bid&&x.date===date);return `<tr><td class="p-2">${esc(s.admissionId)}</td><td class="p-2">${esc(s.name)}</td><td class="p-2"><select class="glass-input p-2 rounded" data-att="${esc(s.id)}"><option ${a?.status==='Present'?'selected':''}>Present</option><option ${a?.status==='Absent'?'selected':''}>Absent</option><option ${a?.status==='Late'?'selected':''}>Late</option></select></td><td class="p-2"><input class="glass-input p-2 rounded" data-note="${esc(s.id)}" value="${esc(a?.notes||'')}" placeholder="Remarks"></td></tr>`}).join('')||'<tr><td colspan="4" class="p-4 text-center">Select a batch with enrolled students.</td></tr>';};
+window.saveBatchAttendance=async function(){const bid=get('attendanceBatchSelect'),date=get('attendanceDate')||today();if(!bid){alert('Choose a batch first.');return;}for(const el of document.querySelectorAll('[data-att]')){const sid=el.dataset.att,note=document.querySelector(`[data-note="${CSS.escape(sid)}"]`)?.value||'';const a={id:bid+'_'+sid+'_'+date,batchId:bid,studentId:sid,date,status:el.value,notes:note};await save('attendance',a);}addAuditLog('Saved attendance '+date);alert('Attendance saved.');};
+window.renderTeachersGrid=async function(){const ts=await records('teachers');$('teachersGrid').innerHTML=ts.map(t=>`<div class="glass-card p-4 rounded-xl"><b>${esc(t.name)}</b><p class="text-xs text-slate-400">${esc(t.designation)}</p><p class="text-xs">${esc(t.phone)}</p><button onclick="deleteItem('teachers','${esc(t.id)}')" class="text-rose-300 text-xs mt-2">Delete</button></div>`).join('')||'<p class="text-slate-400">No teachers added yet.</p>';};
+window.renderExamsTable=async function(){const [xs,st,bs]=await Promise.all(['exams','students','batches'].map(records));$('examsTableBody').innerHTML=xs.map(x=>{const s=st.find(y=>y.id===x.studentId);return `<tr><td class="p-3">${esc(x.title)}</td><td class="p-3">${esc(s?.name||'-')}</td><td class="p-3">${esc(bs.find(b=>b.id===s?.batchId)?.name||'-')}</td><td class="p-3">${esc(x.marks)}</td><td class="p-3">${esc(x.grade)}</td><td class="p-3"><button onclick="deleteItem('exams','${esc(x.id)}')" class="text-rose-300">Delete</button></td></tr>`}).join('')||'<tr><td colspan="6" class="p-4 text-center">No exam results yet.</td></tr>';};
+window.renderExpensesTable=async function(){const xs=await records('expenses');$('expensesTableBody').innerHTML=xs.map(x=>`<tr><td class="p-3">${esc(x.name)}</td><td class="p-3">${esc(x.category)}</td><td class="p-3 whitespace-nowrap">${esc(fmtDate(x.date))}</td><td class="p-3">${money(x.amount)}</td><td class="p-3">${esc(x.method||'Cash')}</td><td class="p-3"><button onclick="deleteItem('expenses','${esc(x.id)}')" class="text-rose-300">Delete</button></td></tr>`).join('')||'<tr><td colspan="6" class="p-4 text-center">No expenses recorded.</td></tr>';};
+window.renderActivityLogs=async function(){const xs=(await records('logs')).slice().reverse().slice(0,100);if($('activityLogsList'))$('activityLogsList').innerHTML=xs.map(x=>`<div class="border-b border-white/10 p-3 text-xs"><b>${esc(x.action)}</b><span class="text-slate-400"> · ${esc(x.timestamp)} · ${esc(x.user)}</span></div>`).join('')||'<p class="p-4 text-slate-400">No activity yet.</p>';};
+window.deleteItem=async function(store,id){let msg='Are you sure you want to delete this record?';try{if(store==='students'){const n=(await records('payments')).filter(p=>p.studentId===id).length;if(n)msg+='\n\nThis student has '+n+' payment record(s). They stay in the ledger and totals but will show as an unknown student.';}if(store==='payments')msg+='\n\nThis changes the student\'s total paid and remaining due.';}catch(err){console.error(err);}if(!confirm(msg))return;try{await remove(store,id);addAuditLog('Deleted '+store+' record');await refreshAllDataViews();toast('Record deleted.','success');}catch(err){toast('Delete failed: '+err.message,'error');}};
+window.showStudentAddPaymentRow=function(){show('studentAddPaymentRow');set('studentPaymentDate',today());set('studentPaymentAmount','');set('studentPaymentTxId','');set('studentPaymentNextDate','');set('studentPaymentMethod','Cash');};window.hideStudentAddPaymentRow=function(){hide('studentAddPaymentRow');};
+async function renderStudentPaymentSummary(sid){const [st,cs,ps]=await Promise.all(['students','courses','payments'].map(records));const s=st.find(x=>x.id===sid);if(!s)return;const L=buildLedger(s,cs.find(c=>c.id===s.courseId),ps);const nextTxt=L.due<=0?'Fully Paid':(L.nextDate?fmtDate(L.nextDate):'Not Set');const sum=$('studentPaymentSummary'),list=$('studentPaymentList');sum.className='grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]';sum.innerHTML=`<div class="p-2 rounded-lg bg-white/5">Course Fee<br><b class="text-white">${money(L.fee)}</b></div><div class="p-2 rounded-lg bg-white/5">Total Paid<br><b class="text-emerald-400">${money(L.paid)}</b></div><div class="p-2 rounded-lg bg-white/5">Remaining Due<br><b class="text-rose-400">${money(L.due)}</b></div><div class="p-2 rounded-lg bg-white/5">Next Payment Date<br><b class="text-cyan-300">${esc(nextTxt)}</b></div>`;list.className='space-y-1 max-h-60 overflow-y-auto pr-1';list.innerHTML=L.rows.map((r,i)=>`<div class="border-b border-white/10 py-1.5 text-xs"><div class="flex flex-wrap justify-between gap-x-3 gap-y-1"><span>${i+1}. ${esc(fmtDate(r.p.date))} · ${esc(r.p.method)}${r.p.transactionId?' · '+esc(r.p.transactionId):''}</span><span><b class="text-emerald-300">${money(r.p.amount)}</b> <button type="button" onclick="printPaymentSlip('${esc(r.p.id)}')" class="text-cyan-300 ml-2 underline">Receipt</button></span></div><div class="text-[10px] text-slate-400">Due after this payment: ${money(r.due)}${r.p.nextPaymentDate&&r.due>0?' · Next payment: '+esc(fmtDate(r.p.nextPaymentDate)):''}</div></div>`).join('')||'<p class="text-slate-400">No payments yet.</p>';}
+window.saveStudentInlinePayment=async function(){if(paySaving)return;const sid=get('studentEditId');if(!sid){toast('Save the student first, then add a payment.','error');return;}paySaving=true;try{const [st,cs,ps]=await Promise.all(['students','courses','payments'].map(records));const s=st.find(x=>x.id===sid);if(!s)throw Error('Student record not found.');const L=buildLedger(s,cs.find(c=>c.id===s.courseId),ps);const amount=Math.round(Number(get('studentPaymentAmount'))*100)/100,date=get('studentPaymentDate'),next=get('studentPaymentNextDate');const err=checkPayment(amount,date,next,L.due,L.fee);if(err)throw Error(err);if(!confirmFuture(date))return;const remaining=Math.round((L.fee-L.paid-amount)*100)/100;await save('payments',{id:uid('PAY'),studentId:sid,amount,date,method:get('studentPaymentMethod')||'Cash',transactionId:get('studentPaymentTxId'),notes:'Added from student profile',nextPaymentDate:(remaining>0&&next)?next:'',createdAt:Date.now()});addAuditLog('Added payment '+money(amount)+' for '+s.name);hide('studentAddPaymentRow');await renderStudentPaymentSummary(sid);await refreshAllDataViews();toast('Payment added. Remaining due: '+money(Math.max(0,remaining)),'success');}catch(err){toast(err.message||'Payment could not be saved.','error');}finally{paySaving=false;}};
+
+/* ===== FINAL UPDATE: shared helpers (toast, dates, ledger, printing) ===== */
+const TOAST_BG={success:'#059669',error:'#e11d48',info:'#2563eb'};
+function toast(msg,type){const box=$('toastBox');if(!box){alert(msg);return;}const d=document.createElement('div');d.className='toast-item';d.style.background=TOAST_BG[type||'info'];d.textContent=msg;box.appendChild(d);setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),450);},type==='error'?6500:3800);}
+window.appToast=toast;
+function isISO(s){if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return false;const a=s.split('-').map(Number);const dt=new Date(Date.UTC(a[0],a[1]-1,a[2]));return a[0]>=2000&&a[0]<=2100&&dt.getUTCMonth()===a[1]-1&&dt.getUTCDate()===a[2];}
+function fmtDate(s){if(!s)return '';if(!isISO(s))return String(s);const a=s.split('-');return a[2]+'/'+a[1]+'/'+a[0];}
+function addDays(iso,n){const a=iso.split('-').map(Number);return new Date(Date.UTC(a[0],a[1]-1,a[2]+n)).toISOString().slice(0,10);}
+function safePhoto(v){return /^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(v||'')?v:'';}
+const payTime=p=>{if(p.createdAt)return Number(p.createdAt)||0;const m=/^PAY-([0-9A-Z]+)-/.exec(p.id||'');return m?(parseInt(m[1],36)||0):0;};
+const sortPay=list=>list.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')||payTime(a)-payTime(b)||String(a.id).localeCompare(String(b.id)));
+/* Single source of truth for money: Remaining Due = Course Fee - sum of this student's payments */
+function buildLedger(student,course,allPayments){
+ const fee=Number(course?.fee||0);
+ const own=sortPay(allPayments.filter(p=>p.studentId===student.id));
+ let run=0;
+ const rows=own.map(p=>{const prev=run;run=Math.round((run+Number(p.amount||0))*100)/100;return {p,prev,after:run,due:Math.max(0,Math.round((fee-run)*100)/100)};});
+ const last=rows.length?rows[rows.length-1].p:null;
+ return {fee,paid:run,due:Math.max(0,Math.round((fee-run)*100)/100),rows,nextDate:last&&isISO(last.nextPaymentDate)?last.nextPaymentDate:''};
+}
+const LOGO='<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="58" height="58" rx="15" fill="#eff6ff" stroke="#bfdbfe"/><path d="M16 18h32v7H23v6h20v7H23v6h25v7H16z" fill="#1769e8"/><rect x="39" y="10" width="6" height="6" rx="1" fill="#06b6d4"/><rect x="47" y="10" width="6" height="6" rx="1" fill="#60a5fa"/></svg>';
+const ADDRESS='Gazipur Bhager Bazar, Bhai Bhai Super Market, 2ND Floor';
+function docHeader(sub){return `<header><div class="logo">${LOGO}</div><div><h1>Easy IT Academy</h1><small>${esc(sub)}<br>${esc(ADDRESS)}</small></div></header>`;}
+
+/* In-page printing (no pop-ups): only #printArea is visible to the printer */
+function printDoc(title,html){
+ const area=$('printArea');if(!area){toast('Print area is missing.','error');return;}
+ area.innerHTML=html;
+ const oldTitle=document.title;document.title=String(title||'Easy IT Academy').replace(/[\\/:*?"<>|]+/g,'-');
+ document.body.classList.add('printing-doc');
+ const done=()=>{window.removeEventListener('afterprint',done);document.body.classList.remove('printing-doc');document.title=oldTitle;area.innerHTML='';};
+ window.addEventListener('afterprint',done);
+ setTimeout(()=>{try{window.print();}catch(err){done();toast('Printing is not available in this browser.','error');}},200);
+}
+
+/* Payment form validation shared by the payment modal and the student profile */
+function checkPayment(amount,date,next,due,fee){
+ if(!Number.isFinite(amount)||!(amount>0))return 'Enter a valid payment amount greater than zero.';
+ if(amount>100000000)return 'Payment amount is unrealistically large. Please check it.';
+ if(!isISO(date))return 'Select a valid payment date.';
+ if(date>addDays(today(),366))return 'Payment date is more than a year ahead. Please check the year.';
+ if(next){if(!isISO(next))return 'Next payment date is not valid.';if(next<=date)return 'Next payment date must be after the payment date.';}
+ if(fee>0&&amount>due)return 'Amount exceeds the remaining due ('+money(due)+'). Please correct the amount.';
+ return '';
+}
+const confirmFuture=date=>date<=today()||confirm('The payment date ('+fmtDate(date)+') is in the future. Save anyway?');
+let paySaving=false;
+window.syncPaymentNextMin=function(){const d=get('paymentDate');if($('paymentNextDate'))$('paymentNextDate').min=isISO(d)?addDays(d,1):'';};
+
+/* Canvas polyfill + redraw on resize / tab return (mobile rotation) */
+if(window.CanvasRenderingContext2D&&!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h){this.rect(x,y,w,h);};}
+function redrawChart(){const v=window.__chartVals;if(v&&$('financialChartCanvas')&&$('tab-dashboard')&&!$('tab-dashboard').classList.contains('hidden'))drawFinancialChart(v[0],v[1],v[2]);}
+let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(redrawChart,150);});
+const _origSwitchTab=window.switchTab;
+window.switchTab=function(id){try{_origSwitchTab(id);}catch(err){console.error(err);}if(id==='dashboard')setTimeout(redrawChart,60);};
+/* Pressing Enter inside the inline payment row must not submit the student form */
+document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target&&ev.target.closest&&ev.target.closest('#studentAddPaymentRow')){ev.preventDefault();window.saveStudentInlinePayment();}});
+
+window.printPaymentSlip=async function(id){try{const [ps,st,cs,bs]=await Promise.all(['payments','students','courses','batches'].map(records));const p=ps.find(x=>x.id===id);if(!p){toast('Payment record not found.','error');return;}const s=st.find(x=>x.id===p.studentId);if(!s){toast('The student for this payment no longer exists, so a receipt cannot be generated.','error');return;}const c=cs.find(x=>x.id===s.courseId),b=bs.find(x=>x.id===s.batchId),L=buildLedger(s,c,ps),r=L.rows.find(x=>x.p.id===id);if(!r)throw Error('Payment is not linked to this student.');const nextTxt=(isISO(p.nextPaymentDate)&&r.due>0)?fmtDate(p.nextPaymentDate):'Not Set';const f=(l,v)=>`<div class="slip-field"><span>${esc(l)}</span><b>${esc(v||'—')}</b></div>`;const notes=(p.notes&&p.notes!=='Added from student profile')?`<div class="slip-sec"><h3>Remarks</h3><div style="font-size:13px">${esc(p.notes)}</div></div>`:'';const html=`<div class="slip"><div class="slip-frame"><div class="slip-head"><div class="slip-logo">${LOGO}</div><div class="slip-org"><h1>Easy IT Academy</h1><div class="slip-addr">Gazipur, Bhager Bazar<br>Bhai Bhai Super Market, 2nd Floor</div><div class="slip-phone"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>01776742677</div></div></div><div class="slip-title"><b>PAYMENT RECEIPT</b><span>Receipt No: <strong>${esc(p.id)}</strong><br>Date: <strong>${esc(fmtDate(p.date))}</strong></span></div><div class="slip-sec"><h3>Student Information</h3><div class="slip-grid">${f('Student Name',s.name)}${f('Student ID / Admission ID',s.admissionId)}${f('Phone Number',s.phone)}${f('Course',c?.name)}${f('Batch',b?.name)}${f('Admission Date',fmtDate(s.admissionDate))}</div></div><div class="slip-sec"><h3>Payment Information</h3><div class="slip-grid">${f('Receipt Number',p.id)}${f('Transaction / Reference ID',p.transactionId)}${f('Payment Date',fmtDate(p.date))}${f('Payment Method',p.method)}</div></div><div class="slip-sec"><h3>Account Summary</h3><table class="slip-table"><tr><td>Total Course Fee</td><td>${money(L.fee)}</td></tr><tr><td>Previous Paid Amount</td><td>${money(r.prev)}</td></tr><tr class="hl"><td>Current Payment Amount</td><td>${money(p.amount)}</td></tr><tr><td>Total Paid Amount (after this payment)</td><td>${money(r.after)}</td></tr><tr class="due"><td>Remaining Due Amount</td><td>${money(r.due)}</td></tr></table></div><div class="slip-next"><div class="slip-field"><span>Next Payment Date</span><b>${esc(nextTxt)}</b></div><div class="slip-field"><span>Remaining Due Amount</span><b style="color:#b91c1c">${money(r.due)}</b></div>${r.due<=0?'<div class="slip-paidfull">PAID IN FULL</div>':''}</div>${notes}<div class="slip-sign"><span>Student Signature</span><span>Authorized Signature</span></div><div class="slip-foot">Thank you for choosing Easy IT Academy. Please keep this receipt for your records.</div></div></div>`;printDoc('Payment Receipt '+(s.admissionId||'')+' '+p.id,html);}catch(err){console.error(err);toast('Could not prepare the receipt: '+err.message,'error');}};
+window.printStudentBiodata=async function(id){try{const [st,cs,bs]=await Promise.all(['students','courses','batches'].map(records));const s=st.find(x=>x.id===id);if(!s){toast('Student not found.','error');return;}const ph=safePhoto(s.photo);const c=cs.find(x=>x.id===s.courseId),b=bs.find(x=>x.id===s.batchId);const cell=(l,v,full)=>`<div class="bio-cell${full?' full':''}"><span>${esc(l)}</span><b>${esc(v||'-')}</b></div>`;const phoneSvg='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>';const body=`<div class="bio"><div class="bio-frame"><div class="bio-head"><div class="bio-logo">${LOGO}</div><div class="bio-org"><h1>Easy IT Academy</h1><div class="bio-addr">Gazipur, Bhager Bazar<br>Bhai Bhai Super Market, 2nd Floor</div><div class="bio-phone">${phoneSvg}01776742677</div></div></div><div class="bio-title">Student Information Sheet</div><div class="bio-body"><div class="bio-id"><div class="bio-photo">${ph?`<img src="${ph}" alt="Student photo">`:'STUDENT PHOTO'}</div><div class="bio-idinfo"><div class="bio-name">${esc(s.name||'-')}</div><div class="bio-idrow"><div class="bio-idbox"><span>Student ID</span><b>${esc(s.admissionId||'-')}</b></div><div class="bio-idbox"><span>Admission Date</span><b>${esc(fmtDate(s.admissionDate)||'-')}</b></div><div class="bio-idbox"><span>Status</span><b>${esc(s.status||'-')}</b></div></div><div class="bio-course">${esc(c?.name||'-')} &middot; ${esc(b?.name||'-')}</div></div></div><div class="bio-sec"><h3>Academic Information</h3><div class="bio-grid">${cell('Student / Admission ID',s.admissionId)}${cell('Student Status',s.status)}${cell('Enrolled Course',c?.name)}${cell('Assigned Batch',b?.name)}${cell('Admission Date',fmtDate(s.admissionDate),true)}</div></div><div class="bio-sec"><h3>Contact &amp; Guardian Information</h3><div class="bio-grid">${cell('Full Name',s.name)}${cell('Phone Number',s.phone)}${cell('Guardian (Name / Phone)',s.guardian,true)}${cell('Residential Address',s.address,true)}</div></div><div class="bio-sec"><h3>Additional Notes</h3><div class="bio-grid">${cell('Notes / Additional Info',s.notes,true)}</div></div></div><div class="bio-sign"><span>Student Signature</span><span>Authorized Officer Signature</span></div><div class="bio-foot">Generated: ${esc(new Date().toLocaleString())} &middot; Easy IT Academy</div></div></div>`;printDoc('Student Biodata '+(s.admissionId||''),body);}catch(err){console.error(err);toast('Could not prepare the document: '+err.message,'error');}};
+window.printStudentPaymentStatement=async function(admissionId){try{const [st,ps,cs,bs]=await Promise.all(['students','payments','courses','batches'].map(records));const s=st.find(x=>x.admissionId===admissionId);if(!s){toast('Student not found. Save the student first.','error');return;}const c=cs.find(x=>x.id===s.courseId),b=bs.find(x=>x.id===s.batchId),L=buildLedger(s,c,ps);const nextTxt=L.due<=0?'Fully Paid':(L.nextDate?fmtDate(L.nextDate):'Not Set');const rows=L.rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(fmtDate(r.p.date))}</td><td>${esc(r.p.id)}</td><td>${esc(r.p.method)}</td><td>${esc(r.p.transactionId||'-')}</td><td style="text-align:right">${money(r.p.amount)}</td><td style="text-align:right">${money(r.due)}</td><td>${r.p.nextPaymentDate&&r.due>0?esc(fmtDate(r.p.nextPaymentDate)):'-'}</td></tr>`).join('')||'<tr><td colspan="8" style="text-align:center">No payments recorded.</td></tr>';const html=`<div class="doc">${docHeader('Student Account Statement')}<div class="box"><p style="margin:0 0 4px"><b>${esc(s.name)}</b> · ID: ${esc(s.admissionId)} · Phone: ${esc(s.phone)}</p><p style="margin:0;color:#475569">Course: ${esc(c?.name||'-')} · Batch: ${esc(b?.name||'-')} · Admission: ${esc(fmtDate(s.admissionDate)||'-')}</p><div class="sum"><div>Course Fee<br><b>${money(L.fee)}</b></div><div>Total Paid<br><b>${money(L.paid)}</b></div><div>Remaining Due<br><b style="color:#b91c1c">${money(L.due)}</b></div><div>Next Payment Date<br><b>${esc(nextTxt)}</b></div></div><table><thead><tr><th>#</th><th>Date</th><th>Receipt No</th><th>Method</th><th>Txn ID</th><th>Amount</th><th>Due After</th><th>Next Date</th></tr></thead><tbody>${rows}</tbody></table><div class="sign"><span>Student Signature</span><span>Authorized Signature</span></div></div><p style="margin-top:16px;font-size:11px;color:#555">Generated: ${esc(new Date().toLocaleString())}</p></div>`;printDoc('Payment Statement '+s.admissionId,html);}catch(err){console.error(err);toast('Could not prepare the statement: '+err.message,'error');}};
+
+function download(name,blob){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+window.exportToCSV=async function(store){const data=await records(store);if(!data.length){alert('No '+store+' data to export yet.');return;}const keys=[...new Set(data.flatMap(x=>Object.keys(x)))];const csv=[keys.join(','),...data.map(x=>keys.map(k=>'"'+String(x[k]??'').replace(/"/g,'""')+'"').join(','))].join('\r\n');download(`easy-it-${store}.csv`,new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));};
+window.exportToExcel=async function(store){const data=await records(store);if(!data.length){alert('No '+store+' data to export yet.');return;}if(window.XLSX){const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,store);XLSX.writeFile(wb,`easy-it-${store}.xlsx`);}else{await exportToCSV(store);alert('Excel library is unavailable; downloaded CSV instead.');}};
+window.exportJSONBackup=async function(){const names=['students','courses','batches','payments','attendance','teachers','exams','expenses','logs'],data={app:'Easy IT Academy',version:1,exportedAt:new Date().toISOString(),records:{}};for(const n of names)data.records[n]=await records(n);download('easy-it-academy-backup.json',new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));};
+
+/* ===== FINAL UPDATE: complete Excel backup (all stores, formatted) ===== */
+window.exportFullExcelBackup=async function(){
+ const btn=$('fullExcelBtn'),label=btn?btn.innerHTML:'';
+ if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Preparing workbook...';}
+ try{
+  if(!window.ExcelJS&&!window.XLSX)throw Error('The Excel library could not be loaded. Connect to the internet, reload the page and try again.');
+  const [students,courses,batches,payments,attendance,teachers,exams,expenses,logs]=await Promise.all(['students','courses','batches','payments','attendance','teachers','exams','expenses','logs'].map(records));
+  const byId=(arr,id)=>arr.find(x=>x.id===id);
+  const ledgers={},payInfo={};
+  students.forEach(s=>{const L=buildLedger(s,byId(courses,s.courseId),payments);ledgers[s.id]=L;L.rows.forEach(r=>{payInfo[r.p.id]=r;});});
+  const cn=id=>byId(courses,id)?.name||'',bn=id=>byId(batches,id)?.name||'';
+  const sn=id=>byId(students,id)?.name||'Unknown / Deleted Student',sa=id=>byId(students,id)?.admissionId||'';
+  const C=(h,w,t,f)=>({h,w,t,f});
+  const mk=(name,list,cols,known)=>{
+   const extraKeys=[...new Set(list.flatMap(x=>Object.keys(x)))].filter(k=>!known.includes(k)&&k!=='photo');
+   const all=cols.concat(extraKeys.map(k=>C(k.replace(/([A-Z])/g,' $1').replace(/^./,m=>m.toUpperCase()),18,'t',x=>(x[k]!==null&&typeof x[k]==='object')?JSON.stringify(x[k]):x[k])));
+   return {name,cols:all,rows:list.map(x=>all.map(c=>c.f(x)))};
+  };
+  const sheets=[
+   mk('Students',students,[C('Student DB ID',20,'t',x=>x.id),C('Admission ID',16,'t',x=>x.admissionId),C('Student Name',26,'t',x=>x.name),C('Phone',16,'t',x=>x.phone),C('Guardian',24,'t',x=>x.guardian),C('Course ID',20,'t',x=>x.courseId),C('Course Name',24,'t',x=>cn(x.courseId)),C('Batch ID',20,'t',x=>x.batchId),C('Batch Name',22,'t',x=>bn(x.batchId)),C('Admission Date',15,'d',x=>x.admissionDate),C('Status',12,'t',x=>x.status),C('Address',32,'t',x=>x.address),C('Notes',28,'t',x=>x.notes),C('Course Fee (BDT)',16,'m',x=>ledgers[x.id].fee),C('Total Paid (BDT)',16,'m',x=>ledgers[x.id].paid),C('Remaining Due (BDT)',18,'m',x=>ledgers[x.id].due),C('Next Payment Date',17,'d',x=>ledgers[x.id].due>0?ledgers[x.id].nextDate:''),C('Has Photo',11,'t',x=>x.photo?'Yes':'No'),C('Last Updated',24,'t',x=>x.updatedAt)],['id','admissionId','name','phone','guardian','courseId','batchId','admissionDate','status','address','notes','updatedAt']),
+   mk('Courses',courses,[C('Course ID',20,'t',x=>x.id),C('Course Name',28,'t',x=>x.name),C('Duration',16,'t',x=>x.duration),C('Fee (BDT)',16,'m',x=>x.fee),C('Description',40,'t',x=>x.description),C('Enrolled Students',17,'n',x=>students.filter(s=>s.courseId===x.id).length)],['id','name','duration','fee','description']),
+   mk('Batches',batches,[C('Batch ID',20,'t',x=>x.id),C('Batch Name',24,'t',x=>x.name),C('Course ID',20,'t',x=>x.courseId),C('Course Name',24,'t',x=>cn(x.courseId)),C('Schedule',30,'t',x=>x.schedule),C('Teacher',22,'t',x=>x.teacher),C('Students',11,'n',x=>students.filter(s=>s.batchId===x.id).length)],['id','name','courseId','schedule','teacher']),
+   mk('Payments',sortPay(payments),[C('Payment ID / Receipt No',26,'t',x=>x.id),C('Student DB ID',20,'t',x=>x.studentId),C('Admission ID',16,'t',x=>sa(x.studentId)),C('Student Name',26,'t',x=>sn(x.studentId)),C('Course',22,'t',x=>cn(byId(students,x.studentId)?.courseId)),C('Payment Date',15,'d',x=>x.date),C('Amount (BDT)',16,'m',x=>x.amount),C('Method',14,'t',x=>x.method),C('Transaction ID',22,'t',x=>x.transactionId),C('Next Payment Date',17,'d',x=>x.nextPaymentDate),C('Notes',28,'t',x=>x.notes),C('Total Paid After (BDT)',20,'m',x=>payInfo[x.id]?payInfo[x.id].after:''),C('Remaining Due After (BDT)',23,'m',x=>payInfo[x.id]?payInfo[x.id].due:''),C('Recorded At',22,'t',x=>x.createdAt?new Date(Number(x.createdAt)).toLocaleString():'')],['id','studentId','date','amount','method','transactionId','nextPaymentDate','notes','createdAt']),
+   mk('Attendance',attendance.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))),[C('Record ID',34,'t',x=>x.id),C('Batch ID',20,'t',x=>x.batchId),C('Batch Name',22,'t',x=>bn(x.batchId)),C('Student DB ID',20,'t',x=>x.studentId),C('Admission ID',16,'t',x=>sa(x.studentId)),C('Student Name',26,'t',x=>sn(x.studentId)),C('Date',14,'d',x=>x.date),C('Status',12,'t',x=>x.status),C('Remarks',28,'t',x=>x.notes)],['id','batchId','studentId','date','status','notes']),
+   mk('Teachers',teachers,[C('Teacher ID',20,'t',x=>x.id),C('Name',26,'t',x=>x.name),C('Designation',26,'t',x=>x.designation),C('Phone',16,'t',x=>x.phone)],['id','name','designation','phone']),
+   mk('Exams',exams,[C('Exam ID',20,'t',x=>x.id),C('Exam Title',28,'t',x=>x.title),C('Student DB ID',20,'t',x=>x.studentId),C('Admission ID',16,'t',x=>sa(x.studentId)),C('Student Name',26,'t',x=>sn(x.studentId)),C('Batch',22,'t',x=>bn(byId(students,x.studentId)?.batchId)),C('Marks',10,'n',x=>x.marks),C('Grade',10,'t',x=>x.grade),C('Date',14,'d',x=>x.date)],['id','title','studentId','marks','grade','date']),
+   mk('Expenses',expenses,[C('Expense ID',20,'t',x=>x.id),C('Expense Item',30,'t',x=>x.name),C('Category',16,'t',x=>x.category),C('Date',14,'d',x=>x.date),C('Amount (BDT)',16,'m',x=>x.amount)],['id','name','category','date','amount']),
+   mk('Activity Logs',logs.slice().sort((a,b)=>String(a.id).localeCompare(String(b.id))),[C('Log ID',22,'t',x=>x.id),C('Action',46,'t',x=>x.action),C('User',14,'t',x=>x.user),C('Timestamp',24,'t',x=>x.timestamp)],['id','action','user','timestamp'])
+  ];
+  /* Bonus sheet: one row per student account */
+  const acctCols=[C('Admission ID',16,'t',x=>x.admissionId),C('Student Name',26,'t',x=>x.name),C('Course',24,'t',x=>cn(x.courseId)),C('Course Fee (BDT)',16,'m',x=>ledgers[x.id].fee),C('Total Paid (BDT)',16,'m',x=>ledgers[x.id].paid),C('Remaining Due (BDT)',18,'m',x=>ledgers[x.id].due),C('Installments',12,'n',x=>ledgers[x.id].rows.length),C('Last Payment Date',17,'d',x=>{const r=ledgers[x.id].rows;return r.length?r[r.length-1].p.date:'';}),C('Next Payment Date',17,'d',x=>ledgers[x.id].due>0?ledgers[x.id].nextDate:'')];
+  sheets.push({name:'Student Accounts',cols:acctCols,rows:students.map(x=>acctCols.map(c=>c.f(x)))});
+  const cell=(v,t)=>{
+   if(v===undefined||v===null||v==='')return null;
+   if(t==='d'){if(isISO(v)){const a=v.split('-').map(Number);return new Date(Date.UTC(a[0],a[1]-1,a[2]));}return String(v);}
+   if(t==='m'||t==='n'){const n=Number(v);return Number.isFinite(n)?n:String(v);}
+   return String(v).slice(0,32000);
+  };
+  const FMT={d:'dd/mm/yyyy',m:'"৳" #,##0.00',n:'0'};
+  let blob;
+  if(window.ExcelJS){
+   const wb=new ExcelJS.Workbook();wb.creator='Easy IT Academy';wb.created=new Date();
+   sheets.forEach(sh=>{
+    const ws=wb.addWorksheet(sh.name,{views:[{state:'frozen',ySplit:1}]});
+    ws.columns=sh.cols.map(c=>({header:c.h,key:c.h,width:c.w||16}));
+    sh.rows.forEach(r=>ws.addRow(r.map((v,i)=>cell(v,sh.cols[i].t))));
+    sh.cols.forEach((c,i)=>{if(FMT[c.t])ws.getColumn(i+1).numFmt=FMT[c.t];});
+    const hr=ws.getRow(1);hr.height=24;
+    hr.eachCell(cl=>{cl.font={bold:true,color:{argb:'FFFFFFFF'},name:'Calibri',size:11};cl.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1E3A8A'}};cl.alignment={vertical:'middle',horizontal:'center',wrapText:true};cl.numFmt='@';});
+    ws.autoFilter={from:{row:1,column:1},to:{row:1,column:sh.cols.length}};
+   });
+   blob=new Blob([await wb.xlsx.writeBuffer()],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  }else{
+   const wb=XLSX.utils.book_new();
+   sheets.forEach(sh=>{
+    const aoa=[sh.cols.map(c=>c.h)].concat(sh.rows.map(r=>r.map((v,i)=>cell(v,sh.cols[i].t))));
+    const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true});
+    ws['!cols']=sh.cols.map(c=>({wch:c.w||16}));
+    for(let r=1;r<aoa.length;r++)sh.cols.forEach((c,i)=>{const a=XLSX.utils.encode_cell({r,c:i});if(ws[a]&&FMT[c.t])ws[a].z=c.t==='m'?'#,##0.00':FMT[c.t];});
+    XLSX.utils.book_append_sheet(wb,ws,sh.name);
+   });
+   blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  }
+  download('Easy_IT_Academy_Full_Backup_'+today()+'.xlsx',blob);
+  const totalRows=sheets.slice(0,9).reduce((a,s)=>a+s.rows.length,0);
+  addAuditLog('Exported full Excel backup ('+totalRows+' records)');
+  toast('Excel backup downloaded: '+sheets.length+' sheets, '+totalRows+' records.','success');
+ }catch(err){console.error(err);toast('Excel backup failed: '+(err.message||err),'error');}
+ finally{if(btn){btn.disabled=false;btn.innerHTML=label;}}
+};
+window.restoreJSONBackup=async function(e){const f=e.target.files?.[0];if(!f)return;try{if(!/\.json$/i.test(f.name))throw Error('Please choose a .json backup file exported from this system.');let data;try{data=JSON.parse(await f.text());}catch(x){throw Error('The file is not valid JSON.');}if(!data||typeof data!=='object'||!data.records||typeof data.records!=='object')throw Error('This is not an Easy IT Academy backup file.');const allowed=['students','courses','batches','payments','attendance','teachers','exams','expenses','logs'];const clean={};let total=0;for(const n of allowed){const items=data.records[n];if(items===undefined)continue;if(!Array.isArray(items))throw Error('Backup section "'+n+'" is damaged.');if(items.some(i=>!i||typeof i!=='object'||i.id===undefined||i.id===null||i.id===''))throw Error('Backup section "'+n+'" contains records without an ID.');clean[n]=items;total+=items.length;}if(!total)throw Error('The backup file contains no records.');if(!confirm('Restore '+total+' records? Records with matching IDs will be updated; all other existing records remain untouched.'))return;for(const n of Object.keys(clean))for(const item of clean[n])await save(n,item);addAuditLog('Restored backup ('+total+' records)');await refreshAllDataViews();toast('Backup restored successfully ('+total+' records).','success');}catch(err){toast('Restore failed: '+err.message,'error');}finally{e.target.value='';}};
+
+// Initialise non-sensitive display fields; database opens before any save/read.
+document.addEventListener('DOMContentLoaded',()=>{if($('currentDateDisplay'))$('currentDateDisplay').textContent=new Date().toLocaleDateString();if($('attendanceDate'))$('attendanceDate').value=today();});
+})();
+
+</script>
+</body>
+</html>
